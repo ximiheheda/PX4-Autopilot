@@ -18,6 +18,7 @@ function spawn_model() {
 	N=$2 #Instance Number
 	WORLD_FILE=$3
 	HITL_MODEL_NAME="temp_${MODEL}_hitl"
+	SITL_MODEL_NAME="${MODEL}_${N}"
 
 	SUPPORTED_MODELS=("iris" "iris_rtps" "plane" "standard_vtol")
 	if [[ " ${SUPPORTED_MODELS[*]} " != *"$MODEL "* ]];
@@ -61,15 +62,16 @@ function spawn_model() {
     	serial_baudrate="--serial_baudrate 921600"
     	enable_lockstep="--enable_lockstep 1"
     	hil_mode="--hil_mode 0"
-    	output_file="--output-file /tmp/${MODEL}_${N}.sdf"
+    	model_name="--model_name ${SITL_MODEL_NAME}"
+    	output_file="--output-file /tmp/${SITL_MODEL_NAME}.sdf"
 		working_dir="$build_path/instance_$n"
 		[ ! -d "$working_dir" ] && mkdir -p "$working_dir"
 		pushd "$working_dir" &>/dev/null
 		echo "starting instance $N in $(pwd)"
-		../bin/px4 -i $N -d "$build_path/etc" -w sitl_${MODEL}_${N} -s etc/init.d-posix/rcS >out.log 2>err.log &
-		python3 $jinja_script $jinja_model $sitl_path $enable_lockstep $mavlink_tcp $mavlink_udp $serial_enabled $serial_device $serial_baudrate $hil_mode $output_file
+		../bin/px4 -i $N -d "$build_path/etc" -w sitl_${SITL_MODEL_NAME} -s etc/init.d-posix/rcS >out.log 2>err.log &
+		python3 $jinja_script $jinja_model $sitl_path $enable_lockstep $model_name $mavlink_tcp $mavlink_udp $serial_enabled $serial_device $serial_baudrate $hil_mode $output_file
 		echo "Spawning ${MODEL}_${N}"
-		gz model --spawn-file=/tmp/${MODEL}_${N}.sdf --model-name=${MODEL}_${N} -x 0.0 -y $((3*${N})) -z 0.0	
+		gz model --spawn-file=/tmp/${SITL_MODEL_NAME}.sdf --model-name=${SITL_MODEL_NAME} -x 0.0 -y $((3*${N})) -z 0.0	
 		popd &>/dev/null
 	fi
 	
