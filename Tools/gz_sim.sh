@@ -27,21 +27,21 @@ function spawn_model() {
 	SUPPORTED_HITL_MODELS=("iris" "plane" "standard_vtol")
 	if [[ " ${SUPPORTED_HITL_MODELS[*]} " != *"$MODEL "* ]] && [ $hitl == true ]; then
 		echo "ERROR: Currently vehicle model $MODEL is not supported for HITL!"
-		echo "       Supported HITL Models: [${SUPPORTED_HITL_MODELS[@]}]"
+		echo "	   Supported HITL Models: [${SUPPORTED_HITL_MODELS[@]}]"
 		exit 1
 	fi
 	SUPPORTED_SITL_MODELS=("iris" "plane" "standard_vtol" "cupcar")
 	if [[ " ${SUPPORTED_SITL_MODELS[*]} " != *"$MODEL "* ]] && [ $hitl == false ]; then
 		echo "ERROR: Currently vehicle model $MODEL is not supported for SITL!"
-		echo "       Supported SITL Models: [${SUPPORTED_SITL_MODELS[@]}]"
+		echo "	   Supported SITL Models: [${SUPPORTED_SITL_MODELS[@]}]"
 		exit 1
 	fi
 	sitl_path=${SCRIPT_DIR}/sitl_gazebo
 	jinja_script=${sitl_path}/scripts/jinja_gen.py
 	jinja_model=${sitl_path}/models/${MODEL}/${MODEL}.sdf.jinja
 	
-    if [ $hitl == true ]; then
-    	python3 ${src_path}/Tools/reboot_mavlink_shell.py
+	if [ $hitl == true ]; then
+		python3 ${src_path}/Tools/reboot_mavlink_shell.py
 		mkdir -p ${sitl_path}/models/${HITL_MODEL_NAME}
 		serial_enabled="--serial_enabled 1"
 		hil_mode="--hil_mode 1"
@@ -68,12 +68,12 @@ function spawn_model() {
 		mavlink_tcp="--mavlink_tcp_port $((4560+${N}))"
 		mavlink_udp="--mavlink_udp_port $((14560+${N}))"
 		serial_enabled="--serial_enabled 0"
-    	serial_device="--serial_device /dev/ttyACM0"
-    	serial_baudrate="--serial_baudrate 921600"
-    	enable_lockstep="--enable_lockstep 1"
-    	hil_mode="--hil_mode 0"
-    	model_name="--model_name ${SITL_MODEL_NAME}"
-    	output_file="--output-file /tmp/${SITL_MODEL_NAME}.sdf"
+		serial_device="--serial_device /dev/ttyACM0"
+		serial_baudrate="--serial_baudrate 921600"
+		enable_lockstep="--enable_lockstep 1"
+		hil_mode="--hil_mode 0"
+		model_name="--model_name ${SITL_MODEL_NAME}"
+		output_file="--output-file /tmp/${SITL_MODEL_NAME}.sdf"
 		working_dir="$build_path/instance_$n"
 		[ ! -d "$working_dir" ] && mkdir -p "$working_dir"
 		pushd "$working_dir" &>/dev/null
