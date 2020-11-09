@@ -1,10 +1,17 @@
 #!/bin/bash
-# run multiple instances of the 'px4' binary, with the gazebo SITL simulation
-# It assumes px4 is already built, with 'make px4_sitl_default gazebo'
+#Author: Benjamin Perseghetti
+#Email: bperseghetti@rudislabs.com
+# This script unifies running gazebo simulation for HITL and SITL
+# You can run multiple instances of the 'px4' binary, with the gazebo SITL simulation
+# This script assumes px4 is already built, with 'make px4_sitl_default gazebo'
+# You can also run HITL with -h flag 
+# Generate world and/or model files with editable json -j [m (model), w (world), mw (model and world), or wm (world and model)]
 
-# The simulator is expected to send to TCP port 4560+i for i in [0, N-1]
-# For example gazebo can be run like this:
-#./Tools/gazebo_sitl_multiple_run.sh -n 10 -m iris
+# The simulator in SITL is expected to send to TCP port 4560+i for i in [0, N-1]
+# For example gazebo can be run like this for multiple SITL:
+# ./Tools/gz_sim.sh -n 10 -m iris
+# Or gazebo can be run like this for HITL:
+# ./Tools/gz_sim.sh -h 1 -m standard_vtol
 
 function cleanup() {
 	echo "running the cleanup"
