@@ -42,7 +42,61 @@
 
 #include <fcntl.h>
 
-int px4_platform_console_init(void)
+#if defined(GPIO_OTGFS_VBUS) && defined(CONFIG_SYSTEM_CDCACM)
+__BEGIN_DECLS
+#include <nuttx/wqueue.h>
+#include <builtin/builtin.h>
+
+static struct work_s usb_serial_work;
+
+extern int sercon_main(int c, char **argv);
+extern int serdis_main(int c, char **argv);
+
+static void mavlink_usb_start(void *arg)
+{
+	if (sercon_main(0, NULL) == EXIT_SUCCESS) {
+		sched_lock();
+		static const char *mavlink_start_argv[] {"mavlink", "start", "-d", "/dev/ttyACM0", NULL};
+		exec_builtin("mavlink", (char **)mavlink_start_argv, NULL, 0);
+		sched_unlock();
+	}
+}
+
+static void usb_serial_disconnect(void *arg)
+{
+	serdis_main(0, NULL);
+}
+
+static void mavlink_usb_stop(void *arg)
+{
+	sched_lock();
+	static const char *mavlink_stop_argv[] {"mavlink", "stop", "-d", "/dev/ttyACM0", NULL};
+	exec_builtin("mavlink", (char **)mavlink_stop_argv, NULL, 0);
+	sched_unlock();
+
+	// serial disconnect
+	work_queue(HPWORK, &usb_serial_work, usb_serial_disconnect, NULL, USEC2TICK(200000));
+}
+
+static int usb_otgfs_vbus_event(int irq, void *context, void *arg)
+{
+	int value = px4_arch_gpioread(GPIO_OTGFS_VBUS);
+
+	if (value == 1) {
+		// USB connected, start sercon immediately, then mavlink
+		work_queue(HPWORK, &usb_serial_work, mavlink_usb_start, NULL, USEC2TICK(200000));
+
+	} else if (value == 0) {
+		// USB disconnected, stop mavlink USB immediately, then serdis
+		work_queue(HPWORK, &usb_serial_work, mavlink_usb_stop, NULL, 0);
+	}
+
+	return 0;
+}
+__END_DECLS
+#endif // GPIO_OTGFS_VBUS && CONFIG_SYSTEM_CDCACM
+
+int px4_platform_console_init()
 {
 #if !defined(CONFIG_DEV_CONSOLE) && defined(CONFIG_DEV_NULL)
 
@@ -82,9 +136,8 @@ int px4_platform_console_init(void)
 	return OK;
 }
 
-int px4_platform_init(void)
+int px4_platform_init()
 {
-
 	int ret = px4_platform_console_init();
 
 	if (ret < 0) {
@@ -116,6 +169,17 @@ int px4_platform_init(void)
 #endif
 
 	px4::WorkQueueManagerStart();
+
+
+#if defined(GPIO_OTGFS_VBUS) && defined(CONFIG_SYSTEM_CDCACM)
+	px4_arch_gpiosetevent(GPIO_OTGFS_VBUS, true, true, true, usb_otgfs_vbus_event, NULL);
+
+	// manually start if already connected
+	if (px4_arch_gpioread(GPIO_OTGFS_VBUS) == 1) {
+		work_queue(HPWORK, &usb_serial_work, mavlink_usb_start, NULL, USEC2TICK(4000000)); // TODO: needs to be after uORB start
+	}
+
+#endif // GPIO_OTGFS_VBUS && CONFIG_SYSTEM_CDCACM
 
 	return PX4_OK;
 }
