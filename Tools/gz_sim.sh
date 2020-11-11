@@ -21,7 +21,7 @@ function cleanup() {
 	pkill gzserver
 }
 
-trap "cleanup" INT
+trap "cleanup" INT SIGINT SIGTERM EXIT
 
 function spawn_model() {
 	MODEL=$1
@@ -38,7 +38,9 @@ function spawn_model() {
 		python3 ${src_path}/Tools/boot_now.py "/dev/ttyACM0"
 		hil_mode="--hil_mode 1"
 		model_name="--model_name ${MODEL}"
-		python3 $jinja_model_script $base_model $model_name $hil_mode $model_json
+		hitl_launch_command="${model_json} ${base_model} ${hil_mode}  ${model_name}"
+		echo "Generating: ${jinja_model_script} ${hitl_launch_command}"
+		python3 ${jinja_model_script} ${hitl_launch_command}
 		sleep 1
 		source ${src_path}/Tools/setup_gazebo.bash ${src_path} ${src_path}/build/${target}
 		sleep 2
@@ -50,11 +52,13 @@ function spawn_model() {
 		model_name="--model_name ${SITL_MODEL_NAME}"
 		output_path="--output_path /tmp"
 		working_dir="$build_path/instance_$n"
+		sitl_launch_command="${model_json} ${base_model} ${mavlink_tcp} ${mavlink_udp} ${model_name} ${output_path}"
 		[ ! -d "$working_dir" ] && mkdir -p "$working_dir"
 		pushd "$working_dir" &>/dev/null
 		echo "starting instance $N in $(pwd)"
 		../bin/px4 -i $N -d "$build_path/etc" -w sitl_${SITL_MODEL_NAME} -s etc/init.d-posix/rcS >out.log 2>err.log &
-		python3 $jinja_model_script $base_model $model_name $mavlink_tcp $mavlink_udp $output_path $model_json
+		python3 ${jinja_model_script} ${sitl_launch_command}
+		echo "Generating: ${jinja_model_script} ${sitl_launch_command}" 
 		echo "Spawning ${SITL_MODEL_NAME}"
 		gz model --spawn-file=/tmp/${SITL_MODEL_NAME}.sdf --model-name=${SITL_MODEL_NAME} -x 0.0 -y $((3*${N})) -z 0.2	
 		popd &>/dev/null
@@ -158,7 +162,7 @@ else
 	echo "RUNNING: python3 $jinja_world_script $world_name $sitl_ode_threads $world_json"
 	python3 $jinja_world_script $world_name $sitl_ode_threads $world_json
 	echo "Generated temp_${world}.world"
-	echo "Starting gazebo"
+	echo "Starting gazebo: gzserver ${sitl_path}/worlds/temp_${world}.world --verbose"
 	gzserver ${sitl_path}/worlds/temp_${world}.world --verbose &
 	sleep 5
 
@@ -173,7 +177,6 @@ else
 			n=$(($n + 1))
 		done
 	else
-		IFS=,
 		for target in ${SCRIPT}; do
 			target="$(echo "$target" | tr -d ' ')" #Remove spaces
 			target_vehicle="${target%:*}"
@@ -186,12 +189,11 @@ else
 
 			m=0
 			while [ $m -lt ${target_number} ]; do
-				spawn_model ${target_vehicle} $n ${world} ${mjson}
+				spawn_model ${PX4_SIM_MODEL} $n ${world} ${mjson}
 				m=$(($m + 1))
 				n=$(($n + 1))
 			done
 		done
-
 	fi
 	echo "Starting gazebo client"
 	gzclient
