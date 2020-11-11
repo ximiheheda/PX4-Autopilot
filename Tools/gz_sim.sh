@@ -35,7 +35,7 @@ function spawn_model() {
 	model_json="--json_gen ${MJ}"
 
 	if [ $hitl == true ]; then
-		python3 ${src_path}/Tools/reboot_mavlink_shell.py
+		python3 ${src_path}/Tools/boot_now.py "/dev/ttyACM0"
 		hil_mode="--hil_mode 1"
 		model_name="--model_name ${MODEL}"
 		python3 $jinja_model_script $base_model $model_name $hil_mode $model_json
@@ -86,7 +86,7 @@ do
 	esac
 done
 
-num_vehicles=${NUM_VEHICLES:=3}
+num_vehicles=${NUM_VEHICLES:=1}
 world=${WORLD:=empty}
 hitl=${HITL:=false}
 threads=${THREADS:=1}
