@@ -439,7 +439,7 @@ RCUpdate::Run()
 		_rc.frame_drop_count = rc_input.rc_lost_frame_count;
 
 		/* publish rc_channels topic even if signal is invalid, for debug */
-		_rc_pub.publish(_rc);
+		_rc_channels_pub.publish(_rc);
 
 		/* only publish manual control if the signal is still present and was present once */
 		if (!signal_lost && rc_input.timestamp_last_signal > 0) {

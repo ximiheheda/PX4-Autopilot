@@ -3919,7 +3919,7 @@ public:
 	}
 
 private:
-	uORB::Subscription _rc_sub{ORB_ID(input_rc)};
+	uORB::Subscription _input_rc_sub{ORB_ID(input_rc)};
 
 	/* do not allow top copying this class */
 	MavlinkStreamRCChannels(MavlinkStreamRCChannels &) = delete;
