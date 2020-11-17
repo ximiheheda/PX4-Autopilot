@@ -59,6 +59,8 @@ Loiter::on_activation()
 {
 	if (_navigator->get_reposition_triplet()->current.valid) {
 		reposition();
+        PX4_INFO("on_activation loitering~~~");
+
 
 	} else {
 		set_loiter_position();
@@ -70,6 +72,7 @@ Loiter::on_active()
 {
 	if (_navigator->get_reposition_triplet()->current.valid) {
 		reposition();
+        PX4_INFO("on_active loitering~~~");
 	}
 
 	// reset the loiter position if we get disarmed
@@ -112,6 +115,11 @@ Loiter::set_loiter_position()
 	pos_sp_triplet->next.valid = false;
 
 	_navigator->set_can_loiter_at_sp(pos_sp_triplet->current.type == position_setpoint_s::SETPOINT_TYPE_LOITER);
+    if(_mission_item.nav_cmd==NAV_CMD_WAYPOINT_USER_1&&pos_sp_triplet->current.type == position_setpoint_s::SETPOINT_TYPE_LOITER)
+    {
+        PX4_INFO("set_can_loiter_at_sp~~~");
+
+    } //added by caosu
 	_navigator->set_position_setpoint_triplet_updated();
 }
 
@@ -131,7 +139,7 @@ Loiter::reposition()
 		// convert mission item to current setpoint
 		struct position_setpoint_triplet_s *pos_sp_triplet = _navigator->get_position_setpoint_triplet();
 		pos_sp_triplet->current.velocity_valid = false;
-		pos_sp_triplet->previous.yaw = _navigator->get_local_position()->heading;
+		pos_sp_triplet->previous.yaw = _navigator->get_global_position()->yaw;
 		pos_sp_triplet->previous.lat = _navigator->get_global_position()->lat;
 		pos_sp_triplet->previous.lon = _navigator->get_global_position()->lon;
 		pos_sp_triplet->previous.alt = _navigator->get_global_position()->alt;

@@ -85,7 +85,6 @@ PrecLand::on_activation()
 	position_setpoint_triplet_s *pos_sp_triplet = _navigator->get_position_setpoint_triplet();
 
 	pos_sp_triplet->next.valid = false;
-	pos_sp_triplet->previous.valid = false;
 
 	// Check that the current position setpoint is valid, otherwise land at current position
 	if (!pos_sp_triplet->current.valid) {
@@ -102,8 +101,6 @@ PrecLand::on_activation()
 	_last_slewrate_time = 0;
 
 	switch_to_state_start();
-
-	_is_activated = true;
 }
 
 void
@@ -159,12 +156,6 @@ PrecLand::on_active()
 		break;
 	}
 
-}
-
-void
-PrecLand::on_inactivation()
-{
-	_is_activated = false;
 }
 
 void

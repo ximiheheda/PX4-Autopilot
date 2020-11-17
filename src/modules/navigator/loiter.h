@@ -42,6 +42,7 @@
 
 #include "navigator_mode.h"
 #include "mission_block.h"
+#include <px4_platform_common/log.h>
 
 #include <px4_platform_common/module_params.h>
 

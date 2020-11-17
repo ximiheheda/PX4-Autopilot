@@ -47,7 +47,6 @@
 #include <mathlib/mathlib.h>
 
 using matrix::Vector2f;
-using namespace time_literals;
 
 namespace runwaytakeoff
 {
@@ -62,25 +61,24 @@ RunwayTakeoff::RunwayTakeoff(ModuleParams *parent) :
 {
 }
 
-void RunwayTakeoff::init(const hrt_abstime &now, float yaw, double current_lat, double current_lon)
+void RunwayTakeoff::init(float yaw, double current_lat, double current_lon)
 {
 	_init_yaw = yaw;
 	_initialized = true;
 	_state = RunwayTakeoffState::THROTTLE_RAMP;
-	_initialized_time = now;
+	_initialized_time = hrt_absolute_time();
 	_climbout = true; // this is true until climbout is finished
 	_start_wp(0) = (float)current_lat;
 	_start_wp(1) = (float)current_lon;
 }
 
-void RunwayTakeoff::update(const hrt_abstime &now, float airspeed, float alt_agl,
+void RunwayTakeoff::update(float airspeed, float alt_agl,
 			   double current_lat, double current_lon, orb_advert_t *mavlink_log_pub)
 {
+
 	switch (_state) {
 	case RunwayTakeoffState::THROTTLE_RAMP:
-		if (((now - _initialized_time) > (_param_rwto_ramp_time.get() * 1_s))
-		    || (airspeed > (_param_fw_airspd_min.get() * _param_rwto_airspd_scl.get() * 0.9f))) {
-
+		if (hrt_elapsed_time(&_initialized_time) > _param_rwto_ramp_time.get() * 1e6f) {
 			_state = RunwayTakeoffState::CLAMPED_TO_RUNWAY;
 		}
 
@@ -192,12 +190,15 @@ float RunwayTakeoff::getYaw(float navigatorYaw)
  * Ramps up in the beginning, until it lifts off the runway it is set to
  * parameter value, then it returns the TECS throttle.
  */
-float RunwayTakeoff::getThrottle(const hrt_abstime &now, float tecsThrottle)
+float RunwayTakeoff::getThrottle(float tecsThrottle)
 {
 	switch (_state) {
 	case RunwayTakeoffState::THROTTLE_RAMP: {
-			float throttle = ((now - _initialized_time) / (_param_rwto_ramp_time.get() * 1_s)) * _param_rwto_max_thr.get();
-			return math::min(throttle, _param_rwto_max_thr.get());
+			float throttle = (hrt_elapsed_time(&_initialized_time) / (float)_param_rwto_ramp_time.get() * 1e6f) *
+					 _param_rwto_max_thr.get();
+			return throttle < _param_rwto_max_thr.get() ?
+			       throttle :
+			       _param_rwto_max_thr.get();
 		}
 
 	case RunwayTakeoffState::CLAMPED_TO_RUNWAY:

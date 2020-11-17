@@ -56,13 +56,14 @@
 
 /* compatible to mavlink MAV_CMD */
 enum NAV_CMD {
-	NAV_CMD_IDLE = 0,
+    NAV_CMD_IDLE = 0,
 	NAV_CMD_WAYPOINT = 16,
 	NAV_CMD_LOITER_UNLIMITED = 17,
 	NAV_CMD_LOITER_TIME_LIMIT = 19,
 	NAV_CMD_RETURN_TO_LAUNCH = 20,
 	NAV_CMD_LAND = 21,
 	NAV_CMD_TAKEOFF = 22,
+    //NAV_CMD_ACROBATIC = 23, //added by caosu
 	NAV_CMD_LOITER_TO_ALT = 31,
 	NAV_CMD_DO_FOLLOW_REPOSITION = 33,
 	NAV_CMD_VTOL_TAKEOFF = 84,
@@ -76,7 +77,6 @@ enum NAV_CMD {
 	NAV_CMD_DO_SET_ROI_LOCATION = 195,
 	NAV_CMD_DO_SET_ROI_WPNEXT_OFFSET = 196,
 	NAV_CMD_DO_SET_ROI_NONE = 197,
-	NAV_CMD_DO_CONTROL_VIDEO = 200,
 	NAV_CMD_DO_SET_ROI = 201,
 	NAV_CMD_DO_DIGICAM_CONTROL = 203,
 	NAV_CMD_DO_MOUNT_CONFIGURE = 204,
@@ -84,7 +84,6 @@ enum NAV_CMD {
 	NAV_CMD_DO_SET_CAM_TRIGG_INTERVAL = 214,
 	NAV_CMD_DO_SET_CAM_TRIGG_DIST = 206,
 	NAV_CMD_SET_CAMERA_MODE = 530,
-	NAV_CMD_SET_CAMERA_ZOOM = 531,
 	NAV_CMD_IMAGE_START_CAPTURE = 2000,
 	NAV_CMD_IMAGE_STOP_CAPTURE = 2001,
 	NAV_CMD_DO_TRIGGER_CONTROL = 2003,
@@ -96,7 +95,7 @@ enum NAV_CMD {
 	NAV_CMD_FENCE_POLYGON_VERTEX_EXCLUSION = 5002,
 	NAV_CMD_FENCE_CIRCLE_INCLUSION = 5003,
 	NAV_CMD_FENCE_CIRCLE_EXCLUSION = 5004,
-	NAV_CMD_CONDITION_GATE = 4501,
+    NAV_CMD_WAYPOINT_USER_1 = 31000, //added by caosu
 	NAV_CMD_INVALID = UINT16_MAX /* ensure that casting a large number results in a specific error */
 };
 
@@ -161,8 +160,11 @@ struct mission_item_s {
 			float ___lat_float;			/**< padding */
 			float ___lon_float;			/**< padding */
 			float altitude;				/**< altitude in meters	(AMSL)			*/
+            uint8_t acrobatic_name;        /**< acrobatic name added by caosu*/
+            uint8_t padding_temp_1[3];
 		};
 		float params[7];				/**< array to store mission command values for MAV_FRAME_MISSION ***/
+        uint8_t padding_temp[4];
 	};
 
 	uint16_t nav_cmd;				/**< navigation command					*/
@@ -186,8 +188,8 @@ struct mission_item_s {
 			 vtol_back_transition : 1,		/**< part of the vtol back transition sequence */
 			 _padding0 : 4;				/**< padding remaining unused bits  */
 	};
-
-	uint8_t _padding1[2];				/**< padding struct size to alignment boundary  */
+    //short _padding[3];
+    uint8_t _padding1[6];				/**< padding struct size to alignment boundary  */
 };
 
 /**
@@ -216,7 +218,7 @@ struct mission_fence_point_s {
 	uint16_t nav_cmd;				/**< navigation command (one of MAV_CMD_NAV_FENCE_*) */
 	uint8_t frame;					/**< MAV_FRAME */
 
-	uint8_t _padding0[5];				/**< padding struct size to alignment boundary  */
+    uint8_t _padding0[5];				/**< padding struct size to alignment boundary length 8  */
 };
 
 /**

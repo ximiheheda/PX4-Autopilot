@@ -107,12 +107,13 @@ PARAM_DEFINE_FLOAT(RTL_MIN_DIST, 5.0f);
 /**
  * Return type
  *
- * Return mode destination and flight path (home location, rally point, mission landing pattern, reverse mission)
+ * Fly straight to the return location or planned mission landing and land there or
+ * use the planned mission to get to those points.
  *
- * @value 0 Return to closest safe point (home or rally point) via direct path.
- * @value 1 Return to closest safe point other than home (mission landing pattern or rally point), via direct path. If no mission landing or rally points are defined return home via direct path.
- * @value 2 Return to a planned mission landing, if available, using the mission path, else return to home via the reverse mission path. Do not consider rally points.
- * @value 3 Return via direct path to closest destination: home, start of mission landing pattern or safe point. If the destination is a mission landing pattern, follow the pattern to land.
+ * @value 0 Return home via direct path
+ * @value 1 Return to a planned mission landing, if available, via direct path, else return to home via direct path
+ * @value 2 Return to a planned mission landing, if available, using the mission path, else return to home via the reverse mission path
+ * @value 3 Return via direct path to closest destination: home, mission landing pattern or safe point
  * @group Return Mode
  */
 PARAM_DEFINE_INT32(RTL_TYPE, 0);
@@ -123,7 +124,7 @@ PARAM_DEFINE_INT32(RTL_TYPE, 0);
  * Defines the half-angle of a cone centered around the destination position that
  * affects the altitude at which the vehicle returns.
  *
- * @unit deg
+ * @unit degrees
  * @min 0
  * @max 90
  * @value 0 No cone, always climb to RTL_RETURN_ALT above destination.
@@ -135,15 +136,3 @@ PARAM_DEFINE_INT32(RTL_TYPE, 0);
  * @group Return Mode
  */
 PARAM_DEFINE_INT32(RTL_CONE_ANG, 0);
-
-/**
- * RTL precision land mode
- *
- * Use precision landing when doing an RTL landing phase.
- *
- * @value 0 No precision landing
- * @value 1 Opportunistic precision landing
- * @value 2 Required precision landing
- * @group Return To Land
- */
-PARAM_DEFINE_INT32(RTL_PLD_MD, 0);
