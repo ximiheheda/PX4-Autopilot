@@ -71,6 +71,7 @@ uint16 VEHICLE_CMD_DO_VTOL_TRANSITION = 3000    # Command VTOL transition
 uint16 VEHICLE_CMD_ARM_AUTHORIZATION_REQUEST = 3001    # Request arm authorization
 uint16 VEHICLE_CMD_PAYLOAD_PREPARE_DEPLOY = 30001	# Prepare a payload deployment in the flight plan
 uint16 VEHICLE_CMD_PAYLOAD_CONTROL_DEPLOY = 30002	# Control a pre-programmed payload deployment
+uint16 VEHICLE_CMD_DO_ACROBATIC = 31000 #added by caosu
 uint16 VEHICLE_CMD_PREFLIGHT_UAVCAN = 243		# UAVCAN configuration. If param 1 == 1 actuator mapping and direction assignment should be started
 uint16 VEHICLE_CMD_LOGGING_START = 2510		# start streaming ULog data
 uint16 VEHICLE_CMD_LOGGING_STOP = 2511			# stop streaming ULog data
@@ -107,6 +108,7 @@ float32 param4			# Parameter 4, as defined by MAVLink uint16 VEHICLE_CMD enum.
 float64 param5			# Parameter 5, as defined by MAVLink uint16 VEHICLE_CMD enum.
 float64 param6			# Parameter 6, as defined by MAVLink uint16 VEHICLE_CMD enum.
 float32 param7			# Parameter 7, as defined by MAVLink uint16 VEHICLE_CMD enum.
+uint8 acrobatic_name
 uint16 command			# Command ID, as defined MAVLink by uint16 VEHICLE_CMD enum.
 uint8 target_system		# System which should execute the command
 uint8 target_component		# Component which should execute the command, 0 for all components

@@ -613,6 +613,60 @@ void FixedwingAttitudeControl::Run()
 			control_input.groundspeed = groundspeed;
 			control_input.groundspeed_scaler = groundspeed_scaler;
 
+            /*
+            * Modified in the attitude control module
+            */
+            if(_vehicle_cmd_sub.updated())
+            {
+                _vehicle_cmd_sub.copy(&_vehicle_cmd);
+            }
+            PX4_INFO("Obtaining vcmd in fixedwingattitude control:%d",_vehicle_cmd.command);
+
+            if(_vehicle_cmd.command==vehicle_command_s::VEHICLE_CMD_DO_ACROBATIC)
+            {
+                now = hrt_absolute_time();
+                if(_time_first_acrobatic == 0)
+                {
+                    _time_first_acrobatic = now;
+                    _pitch_first_acrobatic = control_input.pitch;
+                    _roll_first_acrobatic = control_input.roll;
+                    _yaw_first_acrobatic = control_input.yaw;
+                    //_att_sp.fw_control_yaw = true;
+                }
+                if(((now - _time_first_acrobatic)/1e6)<5) // adjust attitude to the states suitable for acrobatic
+                {
+                    control_input.roll_setpoint = 0;
+                    //control_input.yaw_setpoint = 0;
+                    //control_input.pitch_setpoint = _pitch_first_acrobatic;
+                }
+                else if(((now - _time_first_acrobatic)/1e6 - 5)<5)
+                {
+                    control_input.pitch_setpoint = 20/57.3;//_pitch_first_acrobatic + (float)((((now - _time_first_acrobatic)/1e6 - 5)/57.3)/5*50); //increse to 50 degree in 5 s
+                    //control_input.roll_setpoint = 0;
+                    //control_input.yaw_setpoint = 0;
+                }
+                //else if(((now - _time_first_acrobatic)/1e6)<15)
+                //{
+                //    control_input.pitch_setpoint = _pitch_first_acrobatic + (float)(50/57.3) - (float)(((now - _time_first_acrobatic)/1e6 - 7)/57.3)*50/8; //decrese to 0 degree in 5s
+                //}
+                PX4_INFO("control input:%.2f",(double)control_input.pitch_setpoint*57.3);
+
+                control_input.roll_setpoint = _roll_first_acrobatic;
+                control_input.yaw_setpoint = _yaw_first_acrobatic;
+                //PX4_INFO("control input:%.2f",(double)control_input.roll);
+                //PX4_INFO("now-time_first_acrobatic:%.2f",(now - _time_first_acrobatic)/1e6);
+                //_att_sp.thrust_body[0] = 1.0;  //added by caosu
+                //_acro_control.timestamp = hrt_absolute_time();
+                //_acro_control.acro_pitch_sp = control_input.pitch_setpoint;
+                //_acro_control.acro_roll_sp = control_input.roll_setpoint;
+                //_acro_control.acro_yaw_sp = control_input.yaw_setpoint;
+                //_acro_control_pub.publish(_acro_control);
+            }
+
+
+            //added by caosu
+
+
 			/* reset body angular rate limits on mode change */
 			if ((_vcontrol_mode.flag_control_attitude_enabled != _flag_control_attitude_enabled_last) || params_updated) {
 				if (_vcontrol_mode.flag_control_attitude_enabled

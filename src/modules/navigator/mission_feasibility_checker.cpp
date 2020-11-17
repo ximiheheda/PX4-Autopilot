@@ -250,6 +250,7 @@ MissionFeasibilityChecker::checkMissionItemValidity(const mission_s &mission)
 		    missionitem.nav_cmd != NAV_CMD_DO_SET_CAM_TRIGG_DIST &&
 		    missionitem.nav_cmd != NAV_CMD_DO_SET_CAM_TRIGG_INTERVAL &&
 		    missionitem.nav_cmd != NAV_CMD_SET_CAMERA_MODE &&
+            missionitem.nav_cmd != NAV_CMD_WAYPOINT_USER_1 && //added by caosu
 		    missionitem.nav_cmd != NAV_CMD_DO_VTOL_TRANSITION) {
 
 			mavlink_log_critical(_navigator->get_mavlink_log_pub(), "Mission rejected: item %i: unsupported cmd: %d", (int)(i + 1),

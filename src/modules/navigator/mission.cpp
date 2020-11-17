@@ -235,14 +235,26 @@ Mission::on_active()
 			set_mission_items();
 		}
 
-	} else if (_mission_type != MISSION_TYPE_NONE && _param_mis_altmode.get() == MISSION_ALTMODE_FOH) {
+    }// else if (_mission_type != MISSION_TYPE_NONE && _param_mis_altmode.get() == MISSION_ALTMODE_FOH) {
 
-		altitude_sp_foh_update();
+//		altitude_sp_foh_update();
 
-	} else {
+//	}
+        else {
 		/* if waypoint position reached allow loiter on the setpoint */
 		if (_waypoint_position_reached && _mission_item.nav_cmd != NAV_CMD_IDLE) {
-			_navigator->set_can_loiter_at_sp(true);
+            if(_mission_item.nav_cmd != NAV_CMD_WAYPOINT_USER_1)
+            {
+                _navigator->set_can_loiter_at_sp(true);
+                //PX4_INFO("Loiter at mission item:%d",_mission_item.nav_cmd);
+            }
+            else
+            {
+                //set_mission_items();
+                PX4_INFO("issue_command~~~");
+                issue_acrobatic_command(_mission_item);
+            }
+            //added by caosu
 		}
 	}
 
@@ -303,6 +315,11 @@ Mission::set_current_mission_index(uint16_t index)
 	}
 
 	return false;
+}
+void
+Mission::set_acrobatic_mission_item()
+{
+
 }
 
 void

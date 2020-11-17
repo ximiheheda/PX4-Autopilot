@@ -366,14 +366,17 @@ MissionBlock::is_mission_item_reached()
 
 	/* Once the waypoint and yaw setpoint have been reached we can start the loiter time countdown */
 	if (_waypoint_position_reached && _waypoint_yaw_reached) {
-
+        if(_mission_item.nav_cmd==NAV_CMD_WAYPOINT_USER_1)
+        {
+            //PX4_INFO("_waypoint_position_reached && _waypoint_yaw_reached");
+        }
 		if (_time_first_inside_orbit == 0) {
 			_time_first_inside_orbit = now;
 		}
 
 		/* check if the MAV was long enough inside the waypoint orbit */
-		if ((get_time_inside(_mission_item) < FLT_EPSILON) ||
-            (now - _time_first_inside_orbit >= (hrt_abstime)(get_time_inside(_mission_item) * 1e6f))&&_mission_item.nav_cmd!) {
+        if (((get_time_inside(_mission_item) < FLT_EPSILON) ||
+            (now - _time_first_inside_orbit >= (hrt_abstime)(get_time_inside(_mission_item) * 1e6f)))&&_mission_item.nav_cmd!=NAV_CMD_WAYPOINT_USER_1) {
 
 			position_setpoint_s &curr_sp = _navigator->get_position_setpoint_triplet()->current;
 			const position_setpoint_s &next_sp = _navigator->get_position_setpoint_triplet()->next;
@@ -407,6 +410,18 @@ MissionBlock::is_mission_item_reached()
 
 			return true;
 		}
+        else if((now - _time_first_inside_orbit >= (hrt_abstime)(30*1e6f))&&_mission_item.nav_cmd == NAV_CMD_WAYPOINT_USER_1) //added by caosu for loiter
+        {
+             PX4_INFO("finished the acrobatic defined in the mission item");
+             return true;
+
+        }
+        else
+        {
+            _waypoint_position_reached_previously = _waypoint_position_reached;
+            return false;
+        }
+
 	}
 
 	// all acceptance criteria must be met in the same iteration
@@ -478,6 +493,21 @@ MissionBlock::issue_command(const mission_item_s &item)
 		_navigator->publish_vehicle_cmd(&vcmd);
 	}
 }
+void
+MissionBlock::issue_acrobatic_command(const mission_item_s &item)
+{
+    //PX4_INFO("publishing DO_SET_ACROBATIC command~~~");
+    vehicle_command_s vcmd = {};
+    vcmd.command = item.nav_cmd;
+    //PX4_INFO("p[0]:%f,p[1]:%f,p[2]:%f,p[3]:%f,p[4]:%f,p[5]:%f,p[6]:%f",(double)vcmd.param1,(double)vcmd.param2,
+    //         (double)vcmd.param3,(double)vcmd.param4,(double)vcmd.param5,(double)vcmd.param6,(double)vcmd.param7);
+    vcmd.acrobatic_name = item.acrobatic_name;
+    PX4_INFO("acrobatic_name:%d",vcmd.acrobatic_name);
+    _navigator->publish_vehicle_cmd(&vcmd);
+    return;
+    //added by caosu
+
+}
 
 float
 MissionBlock::get_time_inside(const mission_item_s &item) const
@@ -505,7 +535,8 @@ MissionBlock::item_contains_position(const mission_item_s &item)
 	       item.nav_cmd == NAV_CMD_LOITER_TO_ALT ||
 	       item.nav_cmd == NAV_CMD_VTOL_TAKEOFF ||
 	       item.nav_cmd == NAV_CMD_VTOL_LAND ||
-	       item.nav_cmd == NAV_CMD_DO_FOLLOW_REPOSITION;
+           item.nav_cmd == NAV_CMD_DO_FOLLOW_REPOSITION ||
+           item.nav_cmd == NAV_CMD_WAYPOINT_USER_1; //added by caosu
 }
 
 bool

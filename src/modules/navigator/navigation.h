@@ -94,7 +94,7 @@ enum NAV_CMD {
 	NAV_CMD_FENCE_POLYGON_VERTEX_EXCLUSION = 5002,
 	NAV_CMD_FENCE_CIRCLE_INCLUSION = 5003,
 	NAV_CMD_FENCE_CIRCLE_EXCLUSION = 5004,
-    NAV_CMD_WAYPOINT_USER_1 = 31000; //added by caosu
+    NAV_CMD_WAYPOINT_USER_1 = 31000, //added by caosu
 	NAV_CMD_INVALID = UINT16_MAX /* ensure that casting a large number results in a specific error */
 };
 
@@ -159,8 +159,11 @@ struct mission_item_s {
 			float ___lat_float;			/**< padding */
 			float ___lon_float;			/**< padding */
 			float altitude;				/**< altitude in meters	(AMSL)			*/
+            uint8_t acrobatic_name;        /**< acrobatic name added by caosu*/
+            uint8_t padding_temp_1[3];
 		};
 		float params[7];				/**< array to store mission command values for MAV_FRAME_MISSION ***/
+        uint8_t padding_temp[4];
 	};
 
 	uint16_t nav_cmd;				/**< navigation command					*/
@@ -185,7 +188,8 @@ struct mission_item_s {
 			 _padding0 : 4;				/**< padding remaining unused bits  */
 	};
 
-	uint8_t _padding1[2];				/**< padding struct size to alignment boundary  */
+    //uint8_t _padding1[2];				/**< padding struct size to alignment boundary  */
+    uint8_t _padding1[6];				/**< padding struct size to alignment boundary  */
 };
 
 /**

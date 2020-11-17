@@ -121,6 +121,8 @@ protected:
 
 	void issue_command(const mission_item_s &item);
 
+    void issue_acrobatic_command(const mission_item_s &item);
+
 	float get_time_inside(const mission_item_s &item) const ;
 
 	float get_absolute_altitude_for_item(const mission_item_s &mission_item) const;

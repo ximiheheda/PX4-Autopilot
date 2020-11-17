@@ -157,6 +157,11 @@ private:
 	 */
 	void altitude_sp_foh_update();
 
+    /**
+      * Set the acrobatic mission items
+     */
+    void set_acrobatic_mission_item();//added by caosu
+
 	/**
 	 * Update the cruising speed setpoint.
 	 */

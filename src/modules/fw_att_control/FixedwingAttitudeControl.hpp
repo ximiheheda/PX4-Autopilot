@@ -65,6 +65,7 @@
 #include <uORB/topics/vehicle_land_detected.h>
 #include <uORB/topics/vehicle_rates_setpoint.h>
 #include <uORB/topics/vehicle_status.h>
+#include <uORB/topics/vehicle_command.h>
 
 using matrix::Eulerf;
 using matrix::Quatf;
@@ -107,6 +108,8 @@ private:
 	uORB::Subscription _vehicle_land_detected_sub{ORB_ID(vehicle_land_detected)};	/**< vehicle land detected subscription */
 	uORB::Subscription _vehicle_status_sub{ORB_ID(vehicle_status)};			/**< vehicle status subscription */
 	uORB::Subscription _vehicle_rates_sub{ORB_ID(vehicle_angular_velocity)};
+    uORB::Subscription _vehicle_cmd_sub{ORB_ID(vehicle_command)}; //added by caosu
+    //uORB::Publication<acrobatic_control_s>      _acro_control_pub{ORB_ID(acrobatic_control)}; //added by caosu
 
 	uORB::SubscriptionData<airspeed_s> _airspeed_sub{ORB_ID(airspeed)};
 
@@ -144,6 +147,14 @@ private:
 	bool _flag_control_attitude_enabled_last{false};
 
 	bool _is_tailsitter{false};
+
+    vehicle_command_s _vehicle_cmd = {};
+
+    hrt_abstime now; //added by caosu
+    hrt_abstime _time_first_acrobatic{0};
+    float _pitch_first_acrobatic{0};
+    float _roll_first_acrobatic{0};
+    float _yaw_first_acrobatic{0};
 
 	struct {
 		float p_tc;
