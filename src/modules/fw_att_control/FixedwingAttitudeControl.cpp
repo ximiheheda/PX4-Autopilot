@@ -620,7 +620,7 @@ void FixedwingAttitudeControl::Run()
             {
                 _vehicle_cmd_sub.copy(&_vehicle_cmd);
             }
-            PX4_INFO("Obtaining vcmd in fixedwingattitude control:%d",_vehicle_cmd.command);
+            //PX4_INFO("Obtaining vcmd in fixedwingattitude control:%d",_vehicle_cmd.command);
 
             if(_vehicle_cmd.command==vehicle_command_s::VEHICLE_CMD_DO_ACROBATIC)
             {

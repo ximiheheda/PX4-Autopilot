@@ -220,6 +220,7 @@ Mission::on_active()
 		_execution_mode_changed = false;
 		set_mission_items();
 	}
+    PX4_INFO("_mission_item acceptance radius: %.6f",(double)_mission_item.acceptance_radius);
 
 	/* lets check if we reached the current mission item */
 	if (_mission_type != MISSION_TYPE_NONE && is_mission_item_reached()) {
@@ -235,11 +236,11 @@ Mission::on_active()
 			set_mission_items();
 		}
 
-    }// else if (_mission_type != MISSION_TYPE_NONE && _param_mis_altmode.get() == MISSION_ALTMODE_FOH) {
+    } //else if (_mission_type != MISSION_TYPE_NONE && _param_mis_altmode.get() == MISSION_ALTMODE_FOH) {
 
-//		altitude_sp_foh_update();
+        //altitude_sp_foh_update();
 
-//	}
+    //}
         else {
 		/* if waypoint position reached allow loiter on the setpoint */
 		if (_waypoint_position_reached && _mission_item.nav_cmd != NAV_CMD_IDLE) {
@@ -1327,6 +1328,7 @@ Mission::altitude_sp_foh_update()
 	    || _mission_item.nav_cmd == NAV_CMD_VTOL_LAND
 	    || _mission_item.nav_cmd == NAV_CMD_TAKEOFF
 	    || _mission_item.nav_cmd == NAV_CMD_LOITER_TO_ALT
+        || _mission_item.nav_cmd == NAV_CMD_WAYPOINT_USER_1 //added by caosu
 	    || !_navigator->is_planned_mission()) {
 
 		return;
@@ -1345,6 +1347,7 @@ Mission::altitude_sp_foh_update()
 	 * navigator will soon switch to the next waypoint item (if there is one) as soon as we reach this altitude */
 	if (_min_current_sp_distance_xy < acc_rad) {
 		pos_sp_triplet->current.alt = get_absolute_altitude_for_item(_mission_item);
+        //PX4_INFO("a~~~"); //added by caosu
 
 	} else {
 		/* update the altitude sp of the 'current' item in the sp triplet, but do not update the altitude sp
@@ -1356,6 +1359,7 @@ Mission::altitude_sp_foh_update()
 		float grad = -delta_alt / (_distance_current_previous - acc_rad);
 		float a = pos_sp_triplet->previous.alt - grad * _distance_current_previous;
 		pos_sp_triplet->current.alt = a + grad * _min_current_sp_distance_xy;
+        PX4_INFO("acc_rad:%.6f",(double)acc_rad); //added by caosu
 	}
 
 	// we set altitude directly so we can run this in parallel to the heading update
