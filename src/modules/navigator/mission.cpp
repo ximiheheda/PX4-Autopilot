@@ -220,7 +220,7 @@ Mission::on_active()
 		_execution_mode_changed = false;
 		set_mission_items();
 	}
-    PX4_INFO("_mission_item acceptance radius: %.6f",(double)_mission_item.acceptance_radius);
+    //PX4_INFO("_mission_item acceptance radius: %.6f",(double)_mission_item.acceptance_radius);
 
 	/* lets check if we reached the current mission item */
 	if (_mission_type != MISSION_TYPE_NONE && is_mission_item_reached()) {

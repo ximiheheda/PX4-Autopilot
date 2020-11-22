@@ -402,6 +402,12 @@ FixedwingAttitudeControl::vehicle_land_detected_poll()
 	}
 }
 
+void
+FixedwingAttitudeControl::acrobatic_cmd_poll()
+{
+    _acrobatic_cmd_sub.update(&_acrobatic_cmd);
+}
+
 float FixedwingAttitudeControl::get_airspeed_and_update_scaling()
 {
 	_airspeed_sub.update();
@@ -622,6 +628,7 @@ void FixedwingAttitudeControl::Run()
             }
             //PX4_INFO("Obtaining vcmd in fixedwingattitude control:%d",_vehicle_cmd.command);
 
+            /*
             if(_vehicle_cmd.command==vehicle_command_s::VEHICLE_CMD_DO_ACROBATIC)
             {
                 now = hrt_absolute_time();
@@ -662,7 +669,7 @@ void FixedwingAttitudeControl::Run()
                 //_acro_control.acro_yaw_sp = control_input.yaw_setpoint;
                 //_acro_control_pub.publish(_acro_control);
             }
-
+            */
 
             //added by caosu
 
@@ -720,10 +727,27 @@ void FixedwingAttitudeControl::Run()
 					_yaw_ctrl.control_attitude(control_input); //runs last, because is depending on output of roll and pitch attitude
 					_wheel_ctrl.control_attitude(control_input);
 
+
+                    /**< The ordinary rate controllers */
 					/* Update input data for rate controllers */
-					control_input.roll_rate_setpoint = _roll_ctrl.get_desired_rate();
-					control_input.pitch_rate_setpoint = _pitch_ctrl.get_desired_rate();
-					control_input.yaw_rate_setpoint = _yaw_ctrl.get_desired_rate();
+                    if(_vehicle_cmd.command == vehicle_command_s::VEHICLE_CMD_DO_ACROBATIC)
+                    {
+                        acrobatic_cmd_poll();
+                        control_input.roll_rate_setpoint = _acrobatic_cmd.body_rates_cmd[0];
+                        control_input.pitch_rate_setpoint = _acrobatic_cmd.body_rates_cmd[1];
+                        control_input.yaw_rate_setpoint = _acrobatic_cmd.body_rates_cmd[2];
+                    }
+                    else
+                    {
+                        control_input.roll_rate_setpoint = _roll_ctrl.get_desired_rate();
+                        control_input.pitch_rate_setpoint = _pitch_ctrl.get_desired_rate();
+                        control_input.yaw_rate_setpoint = _yaw_ctrl.get_desired_rate();
+                    }
+
+
+                    /**< The acrobatic rate controllers caosu */
+                    /* Update input data for rate controllers */
+
 
 					/* Run attitude RATE controllers which need the desired attitudes from above, add trim */
 					float roll_u = _roll_ctrl.control_euler_rate(control_input);
@@ -829,6 +853,17 @@ void FixedwingAttitudeControl::Run()
 		// This can be used to counteract the adverse yaw effect when rolling the plane
 		_actuators.control[actuator_controls_s::INDEX_YAW] += _parameters.roll_to_yaw_ff * math::constrain(
 					_actuators.control[actuator_controls_s::INDEX_ROLL], -1.0f, 1.0f);
+
+        /*                       test added by caosu                    */
+        if(_vehicle_cmd.command==vehicle_command_s::VEHICLE_CMD_DO_ACROBATIC)
+        {
+            _actuators.control[actuator_controls_s::INDEX_YAW] = 0;
+            _actuators.control[actuator_controls_s::INDEX_ROLL] = 0;
+            _actuators.control[actuator_controls_s::INDEX_PITCH] = 1.0;
+            _att_sp.thrust_body[0] = 1.0;  //added by caosu
+        }
+
+        /****************************************************************/
 
 		_actuators.control[actuator_controls_s::INDEX_FLAPS] = _flaps_applied;
 		_actuators.control[5] = _manual.aux1;

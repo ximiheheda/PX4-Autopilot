@@ -1,7 +1,6 @@
 #ifndef ACROBATICCOMMAND_H
 #define ACROBATICCOMMAND_H
 
-#endif // ACROBATICCOMMAND_H
 
 #include <iostream>
 #include <drivers/drv_hrt.h>
@@ -20,6 +19,7 @@
 #include <uORB/PublicationMulti.hpp>
 #include <uORB/Subscription.hpp>
 #include <uORB/SubscriptionCallback.hpp>
+#include <uORB/topics/acrobatic_cmd.h>
 #include <uORB/topics/vehicle_command.h>
 #include <uORB/topics/vehicle_attitude.h>
 #include <uORB/topics/vehicle_angular_velocity.h>
@@ -34,32 +34,37 @@ using std::vector;
 
 using uORB::SubscriptionData;
 
-class AcrobaticCommand final : public ModuleBase<AcrobaticCommand>, public ModuleParams,
-        public px4::WorkItem
+class AcrobaticCommand final : public ModuleBase<AcrobaticCommand>, public ModuleParams
 {
 public:
     AcrobaticCommand();
     ~AcrobaticCommand() override;
 
-    void Run() override;
+
+    void run() override;
     bool init();
 
     static int print_usage(const char *reason = nullptr);
     static int custom_command(int argc, char *argv[]); /**< static function does not need the object */
     int print_status() override;
     static int task_spawn(int argc, char *argv[]);
+    static AcrobaticCommand *instantiate(int argc, char *argv[]);
+
 
 
 private:
     perf_counter_t _loop_perf;  /**< loop performance counter */
 
-    uORB::Subscription _att_sub{ORB_ID(vehicle_attitude)};
+    int _att_sub{-1};
     uORB::Subscription _vehicle_cmd_sub{ORB_ID(vehicle_command)};
+
+    uORB::Publication<acrobatic_cmd_s>      _acro_cmd_pub{ORB_ID(acrobatic_cmd)};
 
     const char *filepath; /**< file path of the acrobatic category */
 
 
     vehicle_attitude_s _vehicle_att{}; /**< vehicle attitude */
+    acrobatic_cmd_s _acrobatic_cmd{}; /**< acrobatic cmd to fixedwing attitude module */
     Quatf _att_q{};
     Quatf _att_q_cmd{};
 
@@ -99,7 +104,7 @@ private:
     */
     Quatf interp_1_d();
 
-    void acro_data_read(const char *filepath);
+    void acro_data_read();
     //vector<float> *InputData_To_Vector();
 
     struct{
@@ -137,3 +142,5 @@ private:
 
 
 };
+
+#endif // ACROBATICCOMMAND_H

@@ -32,6 +32,7 @@
 ############################################################################
 
 set(msg_files
+	acrobatic_cmd.msg
 	actuator_armed.msg
 	actuator_controls.msg
 	actuator_direct.msg

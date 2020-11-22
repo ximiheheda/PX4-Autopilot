@@ -66,6 +66,7 @@
 #include <uORB/topics/vehicle_rates_setpoint.h>
 #include <uORB/topics/vehicle_status.h>
 #include <uORB/topics/vehicle_command.h>
+#include <uORB/topics/acrobatic_cmd.h>
 
 using matrix::Eulerf;
 using matrix::Quatf;
@@ -110,6 +111,7 @@ private:
 	uORB::Subscription _vehicle_rates_sub{ORB_ID(vehicle_angular_velocity)};
     uORB::Subscription _vehicle_cmd_sub{ORB_ID(vehicle_command)}; //added by caosu
     //uORB::Publication<acrobatic_control_s>      _acro_control_pub{ORB_ID(acrobatic_control)}; //added by caosu
+    uORB::Subscription _acrobatic_cmd_sub{ORB_ID(acrobatic_cmd)};
 
 	uORB::SubscriptionData<airspeed_s> _airspeed_sub{ORB_ID(airspeed)};
 
@@ -132,6 +134,7 @@ private:
 	vehicle_global_position_s		_global_pos {};		/**< global position */
 	vehicle_rates_setpoint_s		_rates_sp {};		/* attitude rates setpoint */
 	vehicle_status_s			_vehicle_status {};	/**< vehicle status */
+    acrobatic_cmd_s             _acrobatic_cmd {}; /**< acrobatic cmd */
 
 	perf_counter_t	_loop_perf;			/**< loop performance counter */
 
@@ -311,6 +314,7 @@ private:
 	void		vehicle_rates_setpoint_poll();
 	void		vehicle_status_poll();
 	void		vehicle_land_detected_poll();
+    void        acrobatic_cmd_poll();
 
 	float 		get_airspeed_and_update_scaling();
 };
