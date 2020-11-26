@@ -46,12 +46,15 @@
 #include <drivers/drv_hrt.h>
 #include <systemlib/mavlink_log.h>
 #include <uORB/Publication.hpp>
+#include <uORB/Subscription.hpp>
+#include <uORB/SubscriptionCallback.hpp>
 #include <uORB/topics/actuator_controls.h>
 #include <uORB/topics/mission.h>
 #include <uORB/topics/position_setpoint_triplet.h>
 #include <uORB/topics/vehicle_command.h>
 #include <uORB/topics/vehicle_global_position.h>
 #include <uORB/topics/vtol_vehicle_status.h>
+#include <uORB/topics/acrobatic_cmd.h>
 
 class Navigator;
 
@@ -137,5 +140,14 @@ protected:
 	hrt_abstime _action_start{0};
 	hrt_abstime _time_wp_reached{0};
 
+    acrobatic_cmd_s _acrobatic_cmd;
+
 	uORB::Publication<actuator_controls_s>	_actuator_pub{ORB_ID(actuator_controls_2)};
+    uORB::Subscription _acrobatic_cmd_sub{ORB_ID(acrobatic_cmd)};
+
+
+
+
+
+
 };

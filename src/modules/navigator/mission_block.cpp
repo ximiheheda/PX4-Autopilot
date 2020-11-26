@@ -131,6 +131,8 @@ MissionBlock::is_mission_item_reached()
 	}
 
 	hrt_abstime now = hrt_absolute_time();
+    _acrobatic_cmd_sub.update(&_acrobatic_cmd);
+
 
 	if (!_navigator->get_land_detected()->landed && !_waypoint_position_reached) {
 
@@ -410,7 +412,8 @@ MissionBlock::is_mission_item_reached()
 
 			return true;
 		}
-        else if((now - _time_first_inside_orbit >= (hrt_abstime)(30*1e6f))&&_mission_item.nav_cmd == NAV_CMD_WAYPOINT_USER_1) //added by caosu for loiter
+        else if(((_acrobatic_cmd.acrobatic_finish == true))
+                &&(_mission_item.nav_cmd == NAV_CMD_WAYPOINT_USER_1)) //added by caosu for loiter
         {
              PX4_INFO("finished the acrobatic defined in the mission item");
              return true;

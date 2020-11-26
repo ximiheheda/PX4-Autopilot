@@ -456,6 +456,7 @@ void FixedwingAttitudeControl::Run()
 	perf_begin(_loop_perf);
 
 	if (_att_sub.update(&_att)) {
+        //PX4_INFO("time:%ld", now);
 
 		// only update parameters if they changed
 		bool params_updated = _parameter_update_sub.updated();
@@ -730,15 +731,18 @@ void FixedwingAttitudeControl::Run()
 
                     /**< The ordinary rate controllers */
 					/* Update input data for rate controllers */
+                    // added by caosu
                     if(_vehicle_cmd.command == vehicle_command_s::VEHICLE_CMD_DO_ACROBATIC)
                     {
                         acrobatic_cmd_poll();
-                        control_input.roll_rate_setpoint = _acrobatic_cmd.body_rates_cmd[0];
-                        control_input.pitch_rate_setpoint = _acrobatic_cmd.body_rates_cmd[1];
-                        control_input.yaw_rate_setpoint = _acrobatic_cmd.body_rates_cmd[2];
+                        control_input.do_acrobatic = 1;
+                        control_input.body_p_setpoint = _acrobatic_cmd.body_rates_cmd[0];
+                        control_input.body_q_setpoint = _acrobatic_cmd.body_rates_cmd[1];
+                        control_input.body_r_setpoint = _acrobatic_cmd.body_rates_cmd[2];
                     }
                     else
                     {
+                        control_input.do_acrobatic = 0;
                         control_input.roll_rate_setpoint = _roll_ctrl.get_desired_rate();
                         control_input.pitch_rate_setpoint = _pitch_ctrl.get_desired_rate();
                         control_input.yaw_rate_setpoint = _yaw_ctrl.get_desired_rate();
@@ -759,6 +763,10 @@ void FixedwingAttitudeControl::Run()
 
 					float pitch_u = _pitch_ctrl.control_euler_rate(control_input);
 					_actuators.control[actuator_controls_s::INDEX_PITCH] = (PX4_ISFINITE(pitch_u)) ? pitch_u + trim_pitch : trim_pitch;
+                    //PX4_INFO("control_input.roll_rate_setpoint:%.6f",(double)control_input.roll_rate_setpoint);
+                    //PX4_INFO("control_input.pitch_rate_setpoint:%.6f",(double)control_input.pitch_rate_setpoint);
+                    //PX4_INFO("control_input.yaw_rate_setpoint:%.6f",(double)control_input.yaw_rate_setpoint);
+                    //PX4_INFO("$actuator_controls_s::INDEX_PITCH:%.6f",(double)pitch_u);
 
 					if (!PX4_ISFINITE(pitch_u)) {
 						_pitch_ctrl.reset_integrator();
@@ -857,11 +865,12 @@ void FixedwingAttitudeControl::Run()
         /*                       test added by caosu                    */
         if(_vehicle_cmd.command==vehicle_command_s::VEHICLE_CMD_DO_ACROBATIC)
         {
-            _actuators.control[actuator_controls_s::INDEX_YAW] = 0;
-            _actuators.control[actuator_controls_s::INDEX_ROLL] = 0;
-            _actuators.control[actuator_controls_s::INDEX_PITCH] = 1.0;
-            _att_sp.thrust_body[0] = 1.0;  //added by caosu
+            //_actuators.control[actuator_controls_s::INDEX_YAW] = 0;
+            //_actuators.control[actuator_controls_s::INDEX_ROLL] = 0;
+            //_actuators.control[actuator_controls_s::INDEX_PITCH] = 0.5;
+            _att_sp.thrust_body[0] = 0.75;  //added by caosu
         }
+        //PX4_INFO("controlling~~~");
 
         /****************************************************************/
 

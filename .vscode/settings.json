@@ -18,7 +18,9 @@
                         "-s",
                         "etc/init.d-posix/rcS",
                         "-t",
-                        "${workspaceFolder}/test_data"
+                        "${workspaceFolder}/test_data",
+                        "-t",
+                        "${workspaceFolder}/src/modules/acrobatic_command/acro_cmd"
                 ],
                 "stopAtEntry": false,
                 "cwd": "${workspaceFolder}/build/px4_sitl_default/tmp",

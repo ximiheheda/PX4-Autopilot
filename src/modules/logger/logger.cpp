@@ -508,7 +508,7 @@ bool Logger::copy_if_updated(int sub_idx, void *buffer, bool try_to_subscribe)
 
 void Logger::add_default_topics()
 {
-    add_topic("acrobatic_cmd", 100);
+    add_topic("acrobatic_cmd", 20);  //added by caosu
 	add_topic("actuator_controls_0", 100);
 	add_topic("actuator_controls_1", 100);
 	add_topic("airspeed", 200);
@@ -538,7 +538,7 @@ void Logger::add_default_topics()
 	add_topic("trajectory_setpoint", 200);
 	add_topic("vehicle_air_data", 200);
 	add_topic("vehicle_angular_velocity", 20);
-	add_topic("vehicle_attitude", 50);
+    add_topic("vehicle_attitude", 10); //added by caosu default: 50 (interval)
 	add_topic("vehicle_attitude_setpoint", 100);
 	add_topic("vehicle_command");
 	add_topic("vehicle_global_position", 200);
@@ -589,7 +589,7 @@ void Logger::add_high_rate_topics()
 	add_topic("vehicle_angular_velocity");
 	add_topic("vehicle_attitude");
 	add_topic("vehicle_attitude_setpoint");
-	add_topic("vehicle_rates_setpoint");
+    add_topic("vehicle_rates_setpoint");
 }
 
 void Logger::add_debug_topics()

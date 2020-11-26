@@ -55,21 +55,27 @@ public:
 private:
     perf_counter_t _loop_perf;  /**< loop performance counter */
 
-    int _att_sub{-1};
+    //int _att_sub{-1};
     uORB::Subscription _vehicle_cmd_sub{ORB_ID(vehicle_command)};
 
     uORB::Publication<acrobatic_cmd_s>      _acro_cmd_pub{ORB_ID(acrobatic_cmd)};
+    uORB::Subscription _att_sub{ORB_ID(vehicle_attitude)};	/**< vehicle attitude */
+    uORB::Subscription _vehicle_rates_sub{ORB_ID(vehicle_angular_velocity)};
+
+
 
     const char *filepath; /**< file path of the acrobatic category */
 
 
     vehicle_attitude_s _vehicle_att{}; /**< vehicle attitude */
     acrobatic_cmd_s _acrobatic_cmd{}; /**< acrobatic cmd to fixedwing attitude module */
+
     Quatf _att_q{};
     Quatf _att_q_cmd{};
 
     vehicle_command_s _vehicle_cmd{}; /**< vehicle command */
     vehicle_angular_velocity_s _vehicle_angular_vel{}; /**< vehicle angular velocity */
+    uint16_t _finish_count{0}; /**< acrobatic finish count */
 
     bool file_readed{false}; /**< the acrobatic file has been readed */
 
@@ -78,7 +84,7 @@ private:
     hrt_abstime _time_first_acrobatic{0};
 
     vector<Quatf> _quat_v;
-    vector<float> _time_v;
+    vector<hrt_abstime> _time_v;
 
     Quatf _quat_cmd; /**< quaternion command at present time now*/
     Quatf _quat_err; /**< quaternion error */
