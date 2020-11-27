@@ -59,7 +59,7 @@ private:
     uORB::Subscription _vehicle_cmd_sub{ORB_ID(vehicle_command)};
 
     uORB::Publication<acrobatic_cmd_s>      _acro_cmd_pub{ORB_ID(acrobatic_cmd)};
-    uORB::Subscription _att_sub{ORB_ID(vehicle_attitude)};	/**< vehicle attitude */
+    uORB::Subscription  _att_sub{ORB_ID(vehicle_attitude)};	/**< vehicle attitude */
     uORB::Subscription _vehicle_rates_sub{ORB_ID(vehicle_angular_velocity)};
 
 
@@ -70,18 +70,21 @@ private:
     vehicle_attitude_s _vehicle_att{}; /**< vehicle attitude */
     acrobatic_cmd_s _acrobatic_cmd{}; /**< acrobatic cmd to fixedwing attitude module */
 
+    vehicle_attitude_s _att{};
     Quatf _att_q{};
     Quatf _att_q_cmd{};
 
     vehicle_command_s _vehicle_cmd{}; /**< vehicle command */
     vehicle_angular_velocity_s _vehicle_angular_vel{}; /**< vehicle angular velocity */
     uint16_t _finish_count{0}; /**< acrobatic finish count */
+    uint16_t _start_count{0}; /**< acrobatic start count */
 
     bool file_readed{false}; /**< the acrobatic file has been readed */
 
 
     hrt_abstime now;
     hrt_abstime _time_first_acrobatic{0};
+
 
     vector<Quatf> _quat_v;
     vector<hrt_abstime> _time_v;

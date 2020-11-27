@@ -735,6 +735,8 @@ void FixedwingAttitudeControl::Run()
                     if(_vehicle_cmd.command == vehicle_command_s::VEHICLE_CMD_DO_ACROBATIC)
                     {
                         acrobatic_cmd_poll();
+                        PX4_INFO("timestamp:%.6f",(double)_acrobatic_cmd.timestamp);
+                        //PX4_INFO("_att:%f,%f,%f,%f",(double)_att,(double)_att(1),(double)_att(2),(double)_att(3));
                         control_input.do_acrobatic = 1;
                         control_input.body_p_setpoint = _acrobatic_cmd.body_rates_cmd[0];
                         control_input.body_q_setpoint = _acrobatic_cmd.body_rates_cmd[1];
@@ -747,6 +749,9 @@ void FixedwingAttitudeControl::Run()
                         control_input.pitch_rate_setpoint = _pitch_ctrl.get_desired_rate();
                         control_input.yaw_rate_setpoint = _yaw_ctrl.get_desired_rate();
                     }
+                    _acrobatic_cmd.control_input_pqr[0] = control_input.body_p_setpoint;
+                    _acrobatic_cmd.control_input_pqr[1] = control_input.body_q_setpoint;
+                    _acrobatic_cmd.control_input_pqr[2] = control_input.body_r_setpoint;
 
 
                     /**< The acrobatic rate controllers caosu */
@@ -845,6 +850,8 @@ void FixedwingAttitudeControl::Run()
 
 				_actuators.control[actuator_controls_s::INDEX_THROTTLE] = PX4_ISFINITE(_rates_sp.thrust_body[0]) ?
 						_rates_sp.thrust_body[0] : 0.0f;
+                PX4_INFO("rates control directly~~~");
+
 			}
 
 			rate_ctrl_status_s rate_ctrl_status;

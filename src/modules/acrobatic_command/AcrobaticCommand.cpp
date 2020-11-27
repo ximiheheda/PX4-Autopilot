@@ -95,6 +95,7 @@ AcrobaticCommand::acro_data_read() /**< This function needs to run in the init s
         }
         _time_v.push_back(time);
         _quat_v.push_back(q_temp);
+        //PX4_INFO("-----------------------------------------");
         //PX4_INFO("time:%ld",time);
         //PX4_INFO("q_temp:%f,%f,%f,%f",(double)q_temp(0),(double)q_temp(1),(double)q_temp(2),(double)q_temp(3));
     }
@@ -116,13 +117,13 @@ AcrobaticCommand::interp_1_d()
         {
             _finish_count ++;
         }
-        if(((now-_time_first_acrobatic) >= (*iter)) && ((now-_time_first_acrobatic) < (*(iter+1))))
+        if(((now-_time_first_acrobatic) >= ((*iter))) && ((now-_time_first_acrobatic) < (*(iter+1))))
         {
             break;
         }
     }
-    //PX4_INFO("(now-_time_first_acrobatic):%ld",(now-_time_first_acrobatic));
-    //PX4_INFO("index:%d", index);
+    PX4_INFO("(now-_time_first_acrobatic):%ld",(now-_time_first_acrobatic));
+    PX4_INFO("index:%d", index);
 
 
     return _quat_v[index];
@@ -134,47 +135,27 @@ AcrobaticCommand::interp_1_d()
 void
 AcrobaticCommand::run()
 {
-    /* wakeup source(s) */
-    //px4_pollfd_struct_t fds[1] = {};
-
-    /* Setup of loop */
-    //fds[0].fd = _att_sub;
-    //fds[0].events = POLLIN;
-
-    /* rate-limit position subscription to 100 HZ / 10ms*/
-    //orb_set_interval(_att_sub, 10);
 
     while(!should_exit()){
 
-        /* wait for up to 1000ms for data */
-        //int pret = px4_poll(&fds[0], (sizeof(fds) / sizeof(fds[0])), 1000);
 
-        //if (pret == 0) {
-        /* Let the loop run anyway, don't do `continue` here. */
-
-        //} else if (pret < 0) {
-        /* this is undesirable but not much we can do - might want to flag unhappy status */
-        //   PX4_ERR("poll error %d, %d", pret, errno);
-        //   px4_usleep(10000);
-        //   continue;
-
-        //} else {
-        //    if (fds[0].revents & POLLIN) {
-        /* success, vehicle attitude is available */
-        //       orb_copy(ORB_ID(vehicle_attitude), _att_sub, &_att_q);
-        //   }
-        //}
-        if(_att_sub.update(&_att_q)){
+        if(_att_sub.update(&_att)){
 
             perf_begin(_loop_perf);
             now = hrt_absolute_time();
+            _att_q(0) = _att.q[0];
+            _att_q(1) = _att.q[1];
+            _att_q(2) = _att.q[2];
+            _att_q(3) = _att.q[3];
+
+            _start_count ++;
 
 
             vehicle_cmd_poll();
             //PX4_INFO("_vehicle_cmd.command:%d",_vehicle_cmd.command);
 
             /**< If we are not in the acrobatic mode, do nothing */
-            if(_vehicle_cmd.command == vehicle_command_s::VEHICLE_CMD_DO_ACROBATIC)
+            if(_vehicle_cmd.command == vehicle_command_s::VEHICLE_CMD_DO_ACROBATIC && _start_count > 0)
             {
 
                 if(_time_first_acrobatic == 0)
@@ -218,7 +199,7 @@ AcrobaticCommand::run()
 
                 /**< Obtain the matrix Tf */
                 //vehicle_att_poll();
-                _quat_err = -(_quat_cmd - _att_q)/_tc*2;
+                _quat_err = (_quat_cmd - _att_q)/_tc*2;
 
 
                 //Quatf _quat_err_t = _quat_err / _tc;
@@ -235,12 +216,13 @@ AcrobaticCommand::run()
                 _body_setpoint[2] = 2 * _att_q(0) * _quat_err(3) - 2 * _att_q(1) * _quat_err(2)
                         + 2 * _att_q(2) * _quat_err(1) - 2 * _att_q(3) * _quat_err(0);
 
+                _acrobatic_cmd.timestamp = hrt_absolute_time();
+
                 _acrobatic_cmd.body_rates_cmd[0] = _body_setpoint[0];
                 _acrobatic_cmd.body_rates_cmd[1] = _body_setpoint[1];
                 _acrobatic_cmd.body_rates_cmd[2] = _body_setpoint[2];
 
 
-                _acrobatic_cmd.timestamp = hrt_absolute_time();
                 _acrobatic_cmd.quaternion_cmd[0] = _quat_cmd(0);
                 _acrobatic_cmd.quaternion_cmd[1] = _quat_cmd(1);
                 _acrobatic_cmd.quaternion_cmd[2] = _quat_cmd(2);
@@ -256,6 +238,12 @@ AcrobaticCommand::run()
                 {
                     _acrobatic_cmd.acrobatic_finish = true;
                 }
+
+                PX4_INFO("-------------------------");
+                PX4_INFO("timestamp:%ld",_acrobatic_cmd.timestamp);
+                PX4_INFO("_quat_cmd:%f,%f,%f,%f",(double)_quat_cmd(0),(double)_quat_cmd(1),(double)_quat_cmd(2),(double)_quat_cmd(3));
+                PX4_INFO("_quat:%f,%f,%f,%f",(double)_att_q(0),(double)_att_q(1),(double)_att_q(2),(double)_att_q(3));
+
 
                 _acro_cmd_pub.publish(_acrobatic_cmd);
                 //PX4_INFO("publishing time:%ld", now);
