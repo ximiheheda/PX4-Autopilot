@@ -23,6 +23,8 @@
 #include <uORB/topics/vehicle_command.h>
 #include <uORB/topics/vehicle_attitude.h>
 #include <uORB/topics/vehicle_angular_velocity.h>
+#include <uORB/topics/vehicle_global_position.h>
+#include <uORB/topics/vehicle_local_position.h>
 #include <vector>
 #include <cmath>
 
@@ -61,8 +63,8 @@ private:
     uORB::Publication<acrobatic_cmd_s>      _acro_cmd_pub{ORB_ID(acrobatic_cmd)};
     uORB::Subscription  _att_sub{ORB_ID(vehicle_attitude)};	/**< vehicle attitude */
     uORB::Subscription _vehicle_rates_sub{ORB_ID(vehicle_angular_velocity)};
-
-
+    uORB::Subscription _global_pos_sub{ORB_ID(vehicle_global_position)};
+    uORB::Subscription _local_pos_sub{ORB_ID(vehicle_local_position)};
 
     const char *filepath; /**< file path of the acrobatic category */
 
@@ -76,6 +78,9 @@ private:
 
     vehicle_command_s _vehicle_cmd{}; /**< vehicle command */
     vehicle_angular_velocity_s _vehicle_angular_vel{}; /**< vehicle angular velocity */
+    vehicle_global_position_s _global_pos; /**< vehicle global position */
+    vehicle_local_position_s _local_pos; /**< vehicle local position */
+
     uint16_t _finish_count{0}; /**< acrobatic finish count */
     uint16_t _start_count{0}; /**< acrobatic start count */
 
@@ -84,6 +89,8 @@ private:
 
     hrt_abstime now;
     hrt_abstime _time_first_acrobatic{0};
+    hrt_abstime time_prev;
+
 
 
     vector<Quatf> _quat_v;
@@ -93,7 +100,8 @@ private:
     Quatf _quat_err; /**< quaternion error */
     float _tc = 0.3;
     float _body_setpoint[3];
-
+    float _alt_sp_acrobatic{0};   /**< altitude setpoint in acrobatic */
+    float _alt_first_acrobatic{0};  /**< altitude first acrobatic */
 
     /**
     * Update the local parameter cache.
@@ -101,6 +109,8 @@ private:
     int parameter_update();
     void vehicle_att_poll();
     void vehicle_cmd_poll();
+    void vehicle_global_pos_poll();
+    void vehicle_local_pos_poll();
 
     /**
     * Several kinds of the acrobatic command generation in quaternion.

@@ -1813,6 +1813,9 @@ FixedwingPositionControl::tecs_update_pitch_throttle(float alt_sp, float airspee
 {
 	float dt = 0.01f; // prevent division with 0
 
+    _acro_cmd_sub.update(&_acrobatic_cmd); //added by caosu
+
+
 	if (_last_tecs_update > 0) {
 		dt = hrt_elapsed_time(&_last_tecs_update) * 1e-6;
 	}
@@ -1922,6 +1925,20 @@ FixedwingPositionControl::tecs_update_pitch_throttle(float alt_sp, float airspee
 			}
 		}
 	}
+    /*
+    * Modified in the tecs control module
+    */
+    if(_vehicle_cmd_sub.updated())
+    {
+        _vehicle_cmd_sub.copy(&_vehicle_cmd);
+    }
+
+    if(_vehicle_cmd.command == vehicle_command_s::VEHICLE_CMD_DO_ACROBATIC)
+    {
+        pitch_for_tecs = _acrobatic_cmd.euler_cmd[0];
+        alt_sp = _acrobatic_cmd.alt_sp_acrobatic;
+    }
+
 
 	_tecs.update_pitch_throttle(_R_nb, pitch_for_tecs,
 				    _global_pos.alt, alt_sp,

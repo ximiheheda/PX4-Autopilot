@@ -75,6 +75,18 @@ AcrobaticCommand::acro_loop_cmd()
 }
 
 void
+AcrobaticCommand::vehicle_global_pos_poll()
+{
+    _global_pos_sub.update(&_global_pos);
+}
+
+void
+AcrobaticCommand::vehicle_local_pos_poll()
+{
+    _local_pos_sub.update(&_local_pos);
+}
+
+void
 AcrobaticCommand::acro_data_read() /**< This function needs to run in the init section */
 {
     FILE *fp;
@@ -152,6 +164,8 @@ AcrobaticCommand::run()
 
 
             vehicle_cmd_poll();
+            vehicle_global_pos_poll();
+            vehicle_local_pos_poll();
             //PX4_INFO("_vehicle_cmd.command:%d",_vehicle_cmd.command);
 
             /**< If we are not in the acrobatic mode, do nothing */
@@ -161,6 +175,8 @@ AcrobaticCommand::run()
                 if(_time_first_acrobatic == 0)
                 {
                     _time_first_acrobatic = now;
+                    _alt_first_acrobatic = _global_pos.alt;
+                    _alt_sp_acrobatic = _alt_first_acrobatic;
                 }
 
                 /**< read the acrobatic command data file */
@@ -239,6 +255,21 @@ AcrobaticCommand::run()
                     _acrobatic_cmd.acrobatic_finish = true;
                 }
 
+                /**< send the desired vehicle altitude to the tecs module */
+                //_alt_sp_acrobatic += (float)((now-time_prev)/1e6)
+                //float u = _local_pos.vx;
+                //float v = _local_pos.vy;
+                float w = _local_pos.vz;
+
+                /*_alt_first_acrobatic += (float)((now-time_prev)/1e6) *
+                        (2*(_att_q(1)*_att_q(3)-_att_q(0)*_att_q(2))*u +
+                         2*(_att_q(2)*_att_q(3)+_att_q(0)*_att_q(1))*v +
+                         (_att_q(0)*_att_q(0)-_att_q(1)*_att_q(1)-_att_q(2)*_att_q(2)+_att_q(3)*_att_q(3))*w);*/
+                _alt_sp_acrobatic += -1 * (float)((now-time_prev)/1e6) * w; //transfer according to the frame
+                _acrobatic_cmd.alt_sp_acrobatic = _alt_sp_acrobatic;
+                _acrobatic_cmd.euler_cmd[0] = asinf(2*(_att_q(0)*_att_q(2)-_att_q(3)*_att_q(1)));
+
+
                 PX4_INFO("-------------------------");
                 PX4_INFO("timestamp:%ld",_acrobatic_cmd.timestamp);
                 PX4_INFO("_quat_cmd:%f,%f,%f,%f",(double)_quat_cmd(0),(double)_quat_cmd(1),(double)_quat_cmd(2),(double)_quat_cmd(3));
@@ -249,6 +280,7 @@ AcrobaticCommand::run()
                 //PX4_INFO("publishing time:%ld", now);
             }
             perf_end(_loop_perf);
+            time_prev = now;
         }
     }
 

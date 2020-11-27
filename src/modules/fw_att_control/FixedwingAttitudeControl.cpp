@@ -875,7 +875,7 @@ void FixedwingAttitudeControl::Run()
             //_actuators.control[actuator_controls_s::INDEX_YAW] = 0;
             //_actuators.control[actuator_controls_s::INDEX_ROLL] = 0;
             //_actuators.control[actuator_controls_s::INDEX_PITCH] = 0.5;
-            _att_sp.thrust_body[0] = 0.75;  //added by caosu
+            //_att_sp.thrust_body[0] = 0.75;  //added by caosu
         }
         //PX4_INFO("controlling~~~");
 
