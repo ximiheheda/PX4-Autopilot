@@ -10,7 +10,6 @@
 #include <px4_log.h>
 #include <systemlib/mavlink_log.h>
 using namespace time_literals;
-using std::vector;
 using matrix::Quatf;
 
 #if defined(CONFIG_ARCH_BOARD_PX4_SITL)
@@ -99,14 +98,19 @@ AcrobaticCommand::acro_data_read() /**< This function needs to run in the init s
     /**< Init the parser */
     hrt_abstime time;
     Quatf q_temp;
+    quat_time q_t_temp;
 
     while (EOF != (ret = fscanf(fp, "%ld,\t%f,\t%f,\t%f,\t%f",&time,&q_temp(0),&q_temp(1),&q_temp(2),&q_temp(3))))
     {
         if(ret <= 0){
             fclose(fp);
         }
-        _time_v.push_back(time);
-        _quat_v.push_back(q_temp);
+        q_t_temp.quat_v = q_temp;
+        q_t_temp.time_v = time;
+
+        _quat_time_l.push_back(q_t_temp);
+        //_time_v.push_back(time);
+        //_quat_v.push_back(q_temp);
         //PX4_INFO("-----------------------------------------");
         //PX4_INFO("time:%ld",time);
         //PX4_INFO("q_temp:%f,%f,%f,%f",(double)q_temp(0),(double)q_temp(1),(double)q_temp(2),(double)q_temp(3));
@@ -121,24 +125,19 @@ AcrobaticCommand::interp_1_d()
     /**< In order to accelerate the calcualtion, we proposed two interpolate method.
     * The first method is the nearest approach, the second one is not decided yet.
     * */
-    int index = 0;
-
-    for(vector<hrt_abstime>::iterator iter = _time_v.begin(); iter != _time_v.end(); iter++, index++)
+    size_t index;
+    for(index = 0; index < _quat_time_l.size(); index++)
     {
-        if(iter == _time_v.end()-1)
+        if(index == _quat_time_l.size()-1)
         {
             _finish_count ++;
         }
-        if(((now-_time_first_acrobatic) >= ((*iter))) && ((now-_time_first_acrobatic) < (*(iter+1))))
+        else if(((now-_time_first_acrobatic) >= (_quat_time_l[index].time_v)) && ((now-_time_first_acrobatic) < (_quat_time_l[index+1].time_v)))
         {
             break;
         }
     }
-    PX4_INFO("(now-_time_first_acrobatic):%ld",(now-_time_first_acrobatic));
-    PX4_INFO("index:%d", index);
-
-
-    return _quat_v[index];
+    return _quat_time_l[index].quat_v ;
 
 }
 

@@ -2,7 +2,7 @@
 #define ACROBATICCOMMAND_H
 
 
-#include <iostream>
+//#include <iostream>
 #include <drivers/drv_hrt.h>
 #include <lib/perf/perf_counter.h>
 #include <lib/parameters/param.h>
@@ -25,14 +25,17 @@
 #include <uORB/topics/vehicle_angular_velocity.h>
 #include <uORB/topics/vehicle_global_position.h>
 #include <uORB/topics/vehicle_local_position.h>
-#include <vector>
-#include <cmath>
+//#include <vector>
+//#include <cmath>
+#include <string.h>
+#include <stdlib.h>
+#include <containers/Array.hpp>
 
 using matrix::Eulerf;
 using matrix::Quatf;
 //using matrix::Vector;
 using matrix::Matrix;
-using std::vector;
+using px4::Array;
 
 using uORB::SubscriptionData;
 
@@ -91,10 +94,13 @@ private:
     hrt_abstime _time_first_acrobatic{0};
     hrt_abstime time_prev;
 
+    struct quat_time
+    {
+        Quatf quat_v;
+        hrt_abstime time_v;
+    };
 
-
-    vector<Quatf> _quat_v;
-    vector<hrt_abstime> _time_v;
+    Array<quat_time, 1000> _quat_time_l;
 
     Quatf _quat_cmd; /**< quaternion command at present time now*/
     Quatf _quat_err; /**< quaternion error */

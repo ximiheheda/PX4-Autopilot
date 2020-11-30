@@ -363,7 +363,7 @@ FixedwingAttitudeControl::vehicle_rates_setpoint_poll()
 			_rates_sp.roll = -_rates_sp.yaw;
 			_rates_sp.yaw = tmp;
 		}
-	}
+    }
 }
 
 void

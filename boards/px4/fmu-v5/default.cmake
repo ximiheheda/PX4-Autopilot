@@ -84,6 +84,7 @@ px4_add_board(
 		vmount
 		vtol_att_control
 		airspeed_selector
+                acrobatic_command
 
 	SYSTEMCMDS
 		bl_update
