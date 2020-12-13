@@ -324,6 +324,8 @@ FixedwingPositionControl::vehicle_control_mode_poll()
 	}
 }
 
+
+
 void
 FixedwingPositionControl::vehicle_command_poll()
 {
@@ -353,6 +355,7 @@ FixedwingPositionControl::vehicle_status_poll()
 		}
 	}
 }
+
 
 void
 FixedwingPositionControl::airspeed_poll()
@@ -1933,7 +1936,7 @@ FixedwingPositionControl::tecs_update_pitch_throttle(float alt_sp, float airspee
         _vehicle_cmd_sub.copy(&_vehicle_cmd);
     }
 
-    if(_vehicle_cmd.command == vehicle_command_s::VEHICLE_CMD_DO_ACROBATIC)
+    if(_vehicle_cmd.command == vehicle_command_s::VEHICLE_CMD_DO_ACROBATIC && _acrobatic_cmd.acrobatic_finish != true)
     {
         pitch_for_tecs = _acrobatic_cmd.euler_cmd[0];
         alt_sp = _acrobatic_cmd.alt_sp_acrobatic;
@@ -2003,7 +2006,7 @@ fw_pos_control_l1 is the fixed wing position controller.
 
 int FixedwingPositionControl::print_status()
 {
-	PX4_INFO("Running");
+	//PX4_INFO("Running");
 
 	perf_print_counter(_loop_perf);
 

@@ -39,14 +39,14 @@ using px4::Array;
 
 using uORB::SubscriptionData;
 
-class AcrobaticCommand final : public ModuleBase<AcrobaticCommand>, public ModuleParams
+class AcrobaticCommand final : public ModuleBase<AcrobaticCommand>, public px4::WorkItem
 {
 public:
     AcrobaticCommand();
     ~AcrobaticCommand() override;
 
 
-    void run() override;
+    void Run() override;
     bool init();
 
     static int print_usage(const char *reason = nullptr);
@@ -64,13 +64,14 @@ private:
     uORB::Subscription _vehicle_cmd_sub{ORB_ID(vehicle_command)};
 
     uORB::Publication<acrobatic_cmd_s>      _acro_cmd_pub{ORB_ID(acrobatic_cmd)};
-    uORB::Subscription  _att_sub{ORB_ID(vehicle_attitude)};	/**< vehicle attitude */
+    uORB::SubscriptionCallbackWorkItem  _att_sub{this, ORB_ID(vehicle_attitude)};	/**< vehicle attitude */
     uORB::Subscription _vehicle_rates_sub{ORB_ID(vehicle_angular_velocity)};
     uORB::Subscription _global_pos_sub{ORB_ID(vehicle_global_position)};
     uORB::Subscription _local_pos_sub{ORB_ID(vehicle_local_position)};
 
-    const char *filepath; /**< file path of the acrobatic category */
+    orb_advert_t _mavlink_log_pub{nullptr};
 
+    const char *filepath; /**< file path o`f the acrobatic category */
 
     vehicle_attitude_s _vehicle_att{}; /**< vehicle attitude */
     acrobatic_cmd_s _acrobatic_cmd{}; /**< acrobatic cmd to fixedwing attitude module */

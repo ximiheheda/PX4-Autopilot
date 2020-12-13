@@ -510,7 +510,7 @@ Geofence::loadFromFile(const char *filename)
 				goto error;
 			}
 
-			PX4_INFO("Geofence: point: %d, lat %.5lf: lon: %.5lf", pointCounter, vertex.lat, vertex.lon);
+			//PX4_INFO("Geofence: point: %d, lat %.5lf: lon: %.5lf", pointCounter, vertex.lat, vertex.lon);
 
 			pointCounter++;
 
@@ -520,7 +520,7 @@ Geofence::loadFromFile(const char *filename)
 				goto error;
 			}
 
-			PX4_INFO("Geofence: alt min: %.4f, alt_max: %.4f", (double)_altitude_min, (double)_altitude_max);
+			//PX4_INFO("Geofence: alt min: %.4f, alt_max: %.4f", (double)_altitude_min, (double)_altitude_max);
 			gotVertical = true;
 		}
 	}
@@ -600,7 +600,7 @@ void Geofence::printStatus()
 		}
 	}
 
-	PX4_INFO("Geofence: %i inclusion, %i exclusion polygons, %i inclusion, %i exclusion circles, %i total vertices",
+	/*PX4_INFO("Geofence: %i inclusion, %i exclusion polygons, %i inclusion, %i exclusion circles, %i total vertices",
 		 num_inclusion_polygons, num_exclusion_polygons, num_inclusion_circles, num_exclusion_circles,
-		 total_num_vertices);
+		 total_num_vertices);*/
 }

@@ -67,6 +67,8 @@ MissionBlock::MissionBlock(Navigator *navigator) :
 	_mission_item.time_inside = 0.0f;
 	_mission_item.autocontinue = true;
 	_mission_item.origin = ORIGIN_ONBOARD;
+
+    	_acrobatic_cmd.acrobatic_finish = false; 
 }
 
 bool
@@ -131,7 +133,7 @@ MissionBlock::is_mission_item_reached()
 	}
 
 	hrt_abstime now = hrt_absolute_time();
-    _acrobatic_cmd_sub.update(&_acrobatic_cmd);
+    	_acrobatic_cmd_sub.update(&_acrobatic_cmd);
 
 
 	if (!_navigator->get_land_detected()->landed && !_waypoint_position_reached) {
@@ -415,7 +417,7 @@ MissionBlock::is_mission_item_reached()
         else if(((_acrobatic_cmd.acrobatic_finish == true))
                 &&(_mission_item.nav_cmd == NAV_CMD_WAYPOINT_USER_1)) //added by caosu for loiter
         {
-             PX4_INFO("finished the acrobatic defined in the mission item");
+             //PX4_INFO("finished the acrobatic defined in the mission item");
              return true;
 
         }
@@ -456,7 +458,7 @@ MissionBlock::issue_command(const mission_item_s &item)
 	}
 
 	if (item.nav_cmd == NAV_CMD_DO_SET_SERVO) {
-		PX4_INFO("DO_SET_SERVO command");
+		//PX4_INFO("DO_SET_SERVO command");
 
 		// XXX: we should issue a vehicle command and handle this somewhere else
 		actuator_controls_s actuators = {};
@@ -505,7 +507,8 @@ MissionBlock::issue_acrobatic_command(const mission_item_s &item)
     //PX4_INFO("p[0]:%f,p[1]:%f,p[2]:%f,p[3]:%f,p[4]:%f,p[5]:%f,p[6]:%f",(double)vcmd.param1,(double)vcmd.param2,
     //         (double)vcmd.param3,(double)vcmd.param4,(double)vcmd.param5,(double)vcmd.param6,(double)vcmd.param7);
     vcmd.acrobatic_name = item.acrobatic_name;
-    PX4_INFO("acrobatic_name:%d",vcmd.acrobatic_name);
+
+    //PX4_INFO("acrobatic_name:%d",vcmd.acrobatic_name);
     _navigator->publish_vehicle_cmd(&vcmd);
     return;
     //added by caosu

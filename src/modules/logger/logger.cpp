@@ -508,7 +508,7 @@ bool Logger::copy_if_updated(int sub_idx, void *buffer, bool try_to_subscribe)
 
 void Logger::add_default_topics()
 {
-    add_topic("acrobatic_cmd", 20);  //added by caosu
+    	add_topic("acrobatic_cmd", 20);  //added by caosu
 	add_topic("actuator_controls_0", 100);
 	add_topic("actuator_controls_1", 100);
 	add_topic("airspeed", 200);

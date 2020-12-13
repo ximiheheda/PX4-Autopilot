@@ -114,7 +114,7 @@ Loiter::set_loiter_position()
 	_navigator->set_can_loiter_at_sp(pos_sp_triplet->current.type == position_setpoint_s::SETPOINT_TYPE_LOITER);
     if(_mission_item.nav_cmd==NAV_CMD_WAYPOINT_USER_1&&pos_sp_triplet->current.type == position_setpoint_s::SETPOINT_TYPE_LOITER)
     {
-        PX4_INFO("set_can_loiter_at_sp~~~");
+        //PX4_INFO("set_can_loiter_at_sp~~~");
 
     } //added by caosu
 	_navigator->set_position_setpoint_triplet_updated();

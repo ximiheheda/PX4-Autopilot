@@ -12,15 +12,20 @@
 using namespace time_literals;
 using matrix::Quatf;
 
-#if defined(CONFIG_ARCH_BOARD_PX4_SITL)
-#define TEST_DATA_PATH "./test_data/"
-#else
-#define TEST_DATA_PATH "/fs/microsd"
-#endif
+//#if defined(CONFIG_ARCH_BOARD_PX4_SITL)
+//#define TEST_DATA_PATH "./test_data/"
+//#else
+#define TEST_DATA_PATH "/fs/microsd/"
+//#endif
+
+extern "C" __EXPORT int acrobatic_command_main(int argc, char *argv[])
+{
+    return AcrobaticCommand::main(argc, argv);
+}
 
 AcrobaticCommand::AcrobaticCommand():
-    ModuleParams(nullptr),
-    _loop_perf(perf_alloc(PC_ELAPSED, "acrobatic_command"))
+    WorkItem(MODULE_NAME, px4::wq_configurations::att_pos_ctrl),
+    _loop_perf(perf_alloc(PC_ELAPSED, "acrobatic_command: cycle"))
 {
     //PX4_INFO("AcrobaticCommand::AcrobaticCommand");
     /**< fetch initial parameter values*/
@@ -39,6 +44,9 @@ AcrobaticCommand::~AcrobaticCommand()
 bool AcrobaticCommand::init()
 {
     //PX4_INFO("init~~~");
+    if(!_att_sub.registerCallback()){
+        return false;
+    }
     return true;
 }
 
@@ -89,8 +97,19 @@ void
 AcrobaticCommand::acro_data_read() /**< This function needs to run in the init section */
 {
     FILE *fp;
+    mavlink_log_info(&_mavlink_log_pub, "reading file~~~");
+
     //PX4_INFO("filepath:%s",filepath);
-    fp = fopen(filepath, "rt");
+    //filepath = "/fs/microsd/data/loopdata.txt";
+    
+    if((fp = fopen(filepath, "r"))==NULL)
+    {
+        mavlink_log_info(&_mavlink_log_pub, "file open error%s",filepath);
+    }
+    else
+    {
+        mavlink_log_info(&_mavlink_log_pub, "filepath %s open success", filepath);
+    }
     int ret;
 
 
@@ -100,7 +119,7 @@ AcrobaticCommand::acro_data_read() /**< This function needs to run in the init s
     Quatf q_temp;
     quat_time q_t_temp;
 
-    while (EOF != (ret = fscanf(fp, "%ld,\t%f,\t%f,\t%f,\t%f",&time,&q_temp(0),&q_temp(1),&q_temp(2),&q_temp(3))))
+    while (EOF != (ret = fscanf(fp, "%lld,\t%f,\t%f,\t%f,\t%f",&time,&q_temp(0),&q_temp(1),&q_temp(2),&q_temp(3))))
     {
         if(ret <= 0){
             fclose(fp);
@@ -131,6 +150,7 @@ AcrobaticCommand::interp_1_d()
         if(index == _quat_time_l.size()-1)
         {
             _finish_count ++;
+            break;
         }
         else if(((now-_time_first_acrobatic) >= (_quat_time_l[index].time_v)) && ((now-_time_first_acrobatic) < (_quat_time_l[index+1].time_v)))
         {
@@ -144,15 +164,25 @@ AcrobaticCommand::interp_1_d()
 
 
 void
-AcrobaticCommand::run()
+AcrobaticCommand::Run()
 {
+    //int i = 0;
+    //int loop_count = 0;
+    //while(!should_exit()){
 
-    while(!should_exit()){
+    //    if(i==0 && loop_count < 1000)
+    //    {
+    //        mavlink_log_info(&_mavlink_log_pub, "testing~~~");
+    //        continue;
+
+    //   }
+    //    else return;
+        perf_begin(_loop_perf);
+    //    mavlink_log_info(&_mavlink_log_pub, "TEST_DATA_PATH:%s",TEST_DATA_PATH);
 
 
         if(_att_sub.update(&_att)){
 
-            perf_begin(_loop_perf);
             now = hrt_absolute_time();
             _att_q(0) = _att.q[0];
             _att_q(1) = _att.q[1];
@@ -180,13 +210,13 @@ AcrobaticCommand::run()
 
                 /**< read the acrobatic command data file */
 
-
+                //mavlink_log_info(&_mavlink_log_pub, "TEST_DATA_PATH");
                 switch (_vehicle_cmd.acrobatic_name) {
                 /**< loop maneuver */
-                case 0: filepath = TEST_DATA_PATH "loop_data.txt";
+                case 0: filepath = "/fs/microsd/data/loopdata.txt";
                     break;
                     /**< left flight maneuver */
-                case 1: filepath = "acro_cmd/left_flight_data.txt";
+                case 1: filepath = "/fs/microsd/data/loopdata.txt";
                     break;
                     /**< default read nothing, keep straight flight*/
                 default: break;
@@ -198,6 +228,8 @@ AcrobaticCommand::run()
                     acro_data_read();
                     file_readed = true;
                 }
+
+                //mavlink_log_info(&_mavlink_log_pub, "_quat_time_l[index].quat_v%.6lf",(double)_quat_time_l[1].quat_v(0));
 
                 /**< obtain the custom defined acrobatic motion command */
                 _quat_cmd = interp_1_d();
@@ -214,7 +246,8 @@ AcrobaticCommand::run()
 
                 /**< Obtain the matrix Tf */
                 //vehicle_att_poll();
-                _quat_err = (_quat_cmd - _att_q)/_tc*2;
+                //_quat_err = (_quat_cmd - _att_q)/_tc * 2;
+                _quat_err = _quat_cmd - _att_q;
 
 
                 //Quatf _quat_err_t = _quat_err / _tc;
@@ -247,9 +280,9 @@ AcrobaticCommand::run()
                 _acrobatic_cmd.angular_velocity[1] = _pitchspeed;
                 _acrobatic_cmd.angular_velocity[2] = _yawspeed;
 
-                /**< count if the acrobatic is finished */
+                /**< count if the acrobatic is finished*/
 
-                if(_finish_count >= 100)
+                if(_finish_count >= 300)
                 {
                     _acrobatic_cmd.acrobatic_finish = true;
                 }
@@ -269,19 +302,20 @@ AcrobaticCommand::run()
                 _acrobatic_cmd.euler_cmd[0] = asinf(2*(_att_q(0)*_att_q(2)-_att_q(3)*_att_q(1)));
 
 
-                PX4_INFO("-------------------------");
-                PX4_INFO("timestamp:%ld",_acrobatic_cmd.timestamp);
-                PX4_INFO("_quat_cmd:%f,%f,%f,%f",(double)_quat_cmd(0),(double)_quat_cmd(1),(double)_quat_cmd(2),(double)_quat_cmd(3));
-                PX4_INFO("_quat:%f,%f,%f,%f",(double)_att_q(0),(double)_att_q(1),(double)_att_q(2),(double)_att_q(3));
+                //PX4_INFO("-------------------------");
+                //PX4_INFO("timestamp:%lld",_acrobatic_cmd.timestamp);
+                //PX4_INFO("_quat_cmd:%f,%f,%f,%f",(double)_quat_cmd(0),(double)_quat_cmd(1),(double)_quat_cmd(2),(double)_quat_cmd(3));
+                //PX4_INFO("_quat:%f,%f,%f,%f",(double)_att_q(0),(double)_att_q(1),(double)_att_q(2),(double)_att_q(3));
 
 
                 _acro_cmd_pub.publish(_acrobatic_cmd);
                 //PX4_INFO("publishing time:%ld", now);
             }
-            perf_end(_loop_perf);
             time_prev = now;
         }
-    }
+        perf_end(_loop_perf);
+
+    //}
 
 
 }
@@ -289,7 +323,7 @@ AcrobaticCommand::run()
 int AcrobaticCommand::task_spawn(int argc, char *argv[])  /**< generate a task */
 {
 
-    /*AcrobaticCommand *instance = new AcrobaticCommand();
+    AcrobaticCommand *instance = new AcrobaticCommand();
 
     if(instance){
         _object.store(instance);
@@ -307,24 +341,25 @@ int AcrobaticCommand::task_spawn(int argc, char *argv[])  /**< generate a task *
     _object.store(nullptr);
     _task_id = -1;
 
-    return PX4_ERROR;*/
+    return PX4_ERROR;
 
-
+    /*
     _task_id = px4_task_spawn_cmd("acrobatic_command",
                                   SCHED_DEFAULT,
                                   SCHED_PRIORITY_DEFAULT,
-                                  1800,
+                                  1200,
                                   (px4_main_t)&run_trampoline,
                                   (char *const *)argv);
     if(_task_id < 0){
         _task_id = -1;
         return -errno;
     }
-    PX4_INFO("_task_id:%d",_task_id);
+    */
+    //PX4_INFO("_task_id:%d",_task_id);
     return 0;
 
 }
-
+/*
 AcrobaticCommand *AcrobaticCommand::instantiate(int argc, char *argv[])
 {
     AcrobaticCommand *instance = new AcrobaticCommand();
@@ -333,18 +368,18 @@ AcrobaticCommand *AcrobaticCommand::instantiate(int argc, char *argv[])
         PX4_ERR("alloc failed");
     }
     return instance;
-}
+}*/
 
 int AcrobaticCommand::custom_command(int argc, char *argv[])
 {
-    PX4_INFO("custom_command~~");
+    //PX4_INFO("custom_command~~");
     return print_usage("unknown command");
 }
 
 
 int AcrobaticCommand::print_status()
 {
-    PX4_INFO("print_status");
+    //PX4_INFO("print_status");
     perf_print_counter(_loop_perf);
     return 0;
 }
@@ -354,7 +389,7 @@ int AcrobaticCommand::print_usage(const char *reason)
     if(reason){
         PX4_WARN("%s\n", reason);
     }
-    PX4_INFO("print_usage");
+    //PX4_INFO("print_usage");
 
     PRINT_MODULE_DESCRIPTION(
                 R"DESCR_STR(
@@ -371,9 +406,5 @@ int AcrobaticCommand::print_usage(const char *reason)
 }
 
 
-extern "C" __EXPORT int acrobatic_command_main(int argc, char *argv[])
-{
-    return AcrobaticCommand::main(argc, argv);
-}
 
 

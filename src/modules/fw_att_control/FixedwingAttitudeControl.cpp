@@ -732,10 +732,10 @@ void FixedwingAttitudeControl::Run()
                     /**< The ordinary rate controllers */
 					/* Update input data for rate controllers */
                     // added by caosu
-                    if(_vehicle_cmd.command == vehicle_command_s::VEHICLE_CMD_DO_ACROBATIC)
+                    acrobatic_cmd_poll();
+                    if(_vehicle_cmd.command == vehicle_command_s::VEHICLE_CMD_DO_ACROBATIC && _acrobatic_cmd.acrobatic_finish != true)
                     {
-                        acrobatic_cmd_poll();
-                        PX4_INFO("timestamp:%.6f",(double)_acrobatic_cmd.timestamp);
+                        //PX4_INFO("timestamp:%.6f",(double)_acrobatic_cmd.timestamp);
                         //PX4_INFO("_att:%f,%f,%f,%f",(double)_att,(double)_att(1),(double)_att(2),(double)_att(3));
                         control_input.do_acrobatic = 1;
                         control_input.body_p_setpoint = _acrobatic_cmd.body_rates_cmd[0];
@@ -850,7 +850,7 @@ void FixedwingAttitudeControl::Run()
 
 				_actuators.control[actuator_controls_s::INDEX_THROTTLE] = PX4_ISFINITE(_rates_sp.thrust_body[0]) ?
 						_rates_sp.thrust_body[0] : 0.0f;
-                PX4_INFO("rates control directly~~~");
+                //PX4_INFO("rates control directly~~~");
 
 			}
 
@@ -870,13 +870,13 @@ void FixedwingAttitudeControl::Run()
 					_actuators.control[actuator_controls_s::INDEX_ROLL], -1.0f, 1.0f);
 
         /*                       test added by caosu                    */
-        if(_vehicle_cmd.command==vehicle_command_s::VEHICLE_CMD_DO_ACROBATIC)
+        /*if(_vehicle_cmd.command==vehicle_command_s::VEHICLE_CMD_DO_ACROBATIC)
         {
-            //_actuators.control[actuator_controls_s::INDEX_YAW] = 0;
-            //_actuators.control[actuator_controls_s::INDEX_ROLL] = 0;
-            //_actuators.control[actuator_controls_s::INDEX_PITCH] = 0.5;
-            //_att_sp.thrust_body[0] = 0.75;  //added by caosu
-        }
+            _actuators.control[actuator_controls_s::INDEX_YAW] = 0;
+            _actuators.control[actuator_controls_s::INDEX_ROLL] = 0;
+            _actuators.control[actuator_controls_s::INDEX_PITCH] = 1.0;
+            _att_sp.thrust_body[0] = 1.0;  //added by caosu
+        }*/
         //PX4_INFO("controlling~~~");
 
         /****************************************************************/
@@ -1021,7 +1021,7 @@ fw_att_control is the fixed wing attitude controller.
 
 int FixedwingAttitudeControl::print_status()
 {
-	PX4_INFO("Running");
+	//PX4_INFO("Running");
 
 	perf_print_counter(_loop_perf);
 

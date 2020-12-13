@@ -16,7 +16,7 @@ px4_add_board(
 		TEL1:/dev/ttyS1
 		TEL2:/dev/ttyS2
 		TEL4:/dev/ttyS3
-
+		
 	DRIVERS
 		adc
 		barometer # all available barometer drivers

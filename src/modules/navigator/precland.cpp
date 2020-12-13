@@ -424,7 +424,7 @@ PrecLand::switch_to_state_final_approach()
 bool
 PrecLand::switch_to_state_search()
 {
-	PX4_INFO("Climbing to search altitude.");
+	//PX4_INFO("Climbing to search altitude.");
 	vehicle_local_position_s *vehicle_local_position = _navigator->get_local_position();
 
 	position_setpoint_triplet_s *pos_sp_triplet = _navigator->get_position_setpoint_triplet();

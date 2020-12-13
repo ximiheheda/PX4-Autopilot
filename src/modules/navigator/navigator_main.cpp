@@ -140,7 +140,7 @@ Navigator::run()
 	struct stat buffer;
 
 	if (stat(GEOFENCE_FILENAME, &buffer) == 0) {
-		PX4_INFO("Loading geofence from %s", GEOFENCE_FILENAME);
+		//PX4_INFO("Loading geofence from %s", GEOFENCE_FILENAME);
 		_geofence.loadFromFile(GEOFENCE_FILENAME);
 	}
 
@@ -710,7 +710,7 @@ Navigator *Navigator::instantiate(int argc, char *argv[])
 int
 Navigator::print_status()
 {
-	PX4_INFO("Running");
+	//PX4_INFO("Running");
 
 	_geofence.printStatus();
 	return 0;

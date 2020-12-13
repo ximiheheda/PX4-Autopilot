@@ -1399,12 +1399,12 @@ MavlinkMissionManager::parse_mavlink_mission_item(const mavlink_mission_item_t *
 		case MAV_CMD_NAV_RALLY_POINT:
 			mission_item->nav_cmd = (NAV_CMD)mavlink_mission_item->command;
 			break;
-        case MAV_CMD_WAYPOINT_USER_1:
-            mission_item->nav_cmd = MAV_CMD_WAYPOINT_USER_1; //added by caosu
-            mission_item->acrobatic_name = mavlink_mission_item->param2;
-            //mission_item->loiter_radius = 30.0;
-            PX4_INFO("Received the acrobatic command: %d, the param1 is:%f",MAV_CMD_WAYPOINT_USER_1,double(mavlink_mission_item->param1));
-            break; //added by caosu
+        	case MAV_CMD_WAYPOINT_USER_1:
+            		mission_item->nav_cmd = MAV_CMD_WAYPOINT_USER_1; //added by caosu
+            		mission_item->acrobatic_name = mavlink_mission_item->param2;
+            		//mission_item->loiter_radius = 30.0;
+            		PX4_INFO("Received the acrobatic command: %d, the param1 is:%f",MAV_CMD_WAYPOINT_USER_1,double(mavlink_mission_item->param1));
+            	break; //added by caosu
 
 		default:
 			mission_item->nav_cmd = NAV_CMD_INVALID;

@@ -224,6 +224,8 @@ Mission::on_active()
 
 	/* lets check if we reached the current mission item */
 	if (_mission_type != MISSION_TYPE_NONE && is_mission_item_reached()) {
+		mavlink_log_info(_navigator->get_mavlink_log_pub(), "mission item reached:%d",_mission_item.nav_cmd);
+
 		/* If we just completed a takeoff which was inserted before the right waypoint,
 		   there is no need to report that we reached it because we didn't. */
 		if (_work_item_type != WORK_ITEM_TYPE_TAKEOFF) {
@@ -236,14 +238,17 @@ Mission::on_active()
 			set_mission_items();
 		}
 
-    } //else if (_mission_type != MISSION_TYPE_NONE && _param_mis_altmode.get() == MISSION_ALTMODE_FOH) {
+    	} //else if (_mission_type != MISSION_TYPE_NONE && _param_mis_altmode.get() == MISSION_ALTMODE_FOH) {
 
         //altitude_sp_foh_update();
 
     //}
         else {
+        	
 		/* if waypoint position reached allow loiter on the setpoint */
-		if (_waypoint_position_reached && _mission_item.nav_cmd != NAV_CMD_IDLE) {
+	if (_waypoint_position_reached && _mission_item.nav_cmd != NAV_CMD_IDLE) {
+            //mavlink_log_info(_navigator->get_mavlink_log_pub(), "_mission_item.nav_cmd:%d",_mission_item.nav_cmd);
+
             if(_mission_item.nav_cmd != NAV_CMD_WAYPOINT_USER_1)
             {
                 _navigator->set_can_loiter_at_sp(true);
@@ -252,7 +257,8 @@ Mission::on_active()
             else
             {
                 //set_mission_items();
-                PX4_INFO("issue_command~~~");
+                //PX4_INFO("issue_command~~~");
+                //mavlink_log_info(_navigator->get_mavlink_log_pub(), "_mission_item.acrobatic_name:%d",_mission_item.acrobatic_name);
                 issue_acrobatic_command(_mission_item);
             }
             //added by caosu
@@ -601,6 +607,7 @@ Mission::set_mission_items()
 	work_item_type new_work_item_type = WORK_ITEM_TYPE_DEFAULT;
 
 	if (prepare_mission_items(&_mission_item, &mission_item_next_position, &has_next_position_item)) {
+		mavlink_log_info(_navigator->get_mavlink_log_pub(), "_mission_item_cmd:%d",_mission_item.nav_cmd);
 		/* if mission type changed, notify */
 		if (_mission_type != MISSION_TYPE_MISSION) {
 			mavlink_log_info(_navigator->get_mavlink_log_pub(),
@@ -1359,7 +1366,7 @@ Mission::altitude_sp_foh_update()
 		float grad = -delta_alt / (_distance_current_previous - acc_rad);
 		float a = pos_sp_triplet->previous.alt - grad * _distance_current_previous;
 		pos_sp_triplet->current.alt = a + grad * _min_current_sp_distance_xy;
-        PX4_INFO("acc_rad:%.6f",(double)acc_rad); //added by caosu
+        //PX4_INFO("acc_rad:%.6f",(double)acc_rad); //added by caosu
 	}
 
 	// we set altitude directly so we can run this in parallel to the heading update
