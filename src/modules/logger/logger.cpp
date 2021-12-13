@@ -508,7 +508,15 @@ bool Logger::copy_if_updated(int sub_idx, void *buffer, bool try_to_subscribe)
 
 void Logger::add_default_topics()
 {
-    	add_topic("acrobatic_cmd", 20);  //added by caosu
+    add_topic("acrobatic_cmd", 10);  //added by caosu
+    //add_topic("model_iden_data", 10); //added by caosu, in 01.07.2021
+    //add_topic("manual_status", 10);  //added by caosu
+    //add_topic("hil_sensor_debug", 100); //added by caosu
+    //add_topic("hil_sensor_debug_voted", 100); //added by caosu
+    //add_topic("hil_sensor_debug_voted_sensor", 100); //added by caosu
+    //add_topic("dmp_test", 10); //added by caosu
+    //add_topic("hil_sensor_debug_ekf", 100); //added by caosu
+    //add_topic("hil_sensor_debug_gyro", 100); //added by caosu
 	add_topic("actuator_controls_0", 100);
 	add_topic("actuator_controls_1", 100);
 	add_topic("airspeed", 200);
@@ -530,7 +538,7 @@ void Logger::add_default_topics()
 	add_topic("position_controller_status", 500);
 	add_topic("position_setpoint_triplet", 200);
 	add_topic("radio_status");
-	add_topic("rate_ctrl_status", 200);
+    add_topic("rate_ctrl_status", 200); //edited by caosu default: 200 (interval) 10 former
 	add_topic("sensor_combined", 100);
 	add_topic("sensor_preflight", 200);
 	add_topic("system_power", 500);
@@ -538,12 +546,12 @@ void Logger::add_default_topics()
 	add_topic("trajectory_setpoint", 200);
 	add_topic("vehicle_air_data", 200);
 	add_topic("vehicle_angular_velocity", 20);
-    add_topic("vehicle_attitude", 10); //added by caosu default: 50 (interval)
+    add_topic("vehicle_attitude", 50); //added by caosu default: 50 (interval) 10 former
 	add_topic("vehicle_attitude_setpoint", 100);
 	add_topic("vehicle_command");
 	add_topic("vehicle_global_position", 200);
 	add_topic("vehicle_land_detected");
-	add_topic("vehicle_local_position", 100);
+    add_topic("vehicle_local_position", 100); //added by caosu default: 100 (interval) 10 former
 	add_topic("vehicle_local_position_setpoint", 100);
 	add_topic("vehicle_magnetometer", 200);
 	add_topic("vehicle_rates_setpoint", 20);
@@ -588,8 +596,10 @@ void Logger::add_high_rate_topics()
 	add_topic("sensor_combined");
 	add_topic("vehicle_angular_velocity");
 	add_topic("vehicle_attitude");
-	add_topic("vehicle_attitude_setpoint");
-    add_topic("vehicle_rates_setpoint");
+	//add_topic("vehicle_attitude_setpoint");
+    //add_topic("vehicle_rates_setpoint");
+    add_topic("vehicle_attitude_setpoint");
+	add_topic("vehicle_rates_setpoint");
 }
 
 void Logger::add_debug_topics()

@@ -15,7 +15,8 @@ ekf2 start
 #
 fw_att_control start
 fw_pos_control_l1 start
-acrobatic_command start
+#acrobatic_command start
+#acrobatic_L1 start
 
 #module start
 # airspeed_selector start

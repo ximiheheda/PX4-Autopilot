@@ -70,6 +70,18 @@ public:
 
 		return output;
 	}
+    /* A single value version of the filter*/
+    inline float apply_v(const float &sample)
+    {
+        // do the filtering
+        const float delay_element_0_v{sample - _delay_element_1_v * _a1 - _delay_element_2_v * _a2};
+        const float output{delay_element_0_v * _b0 + _delay_element_1_v * _b1 + _delay_element_2_v * _b2};
+
+        _delay_element_2_v = _delay_element_1_v;
+        _delay_element_1_v = delay_element_0_v;
+
+        return output;
+    }
 
 	// Return the cutoff frequency
 	float get_cutoff_freq() const { return _cutoff_freq; }
@@ -90,6 +102,9 @@ private:
 
 	matrix::Vector3f _delay_element_1{0.0f, 0.0f, 0.0f};	// buffered sample -1
 	matrix::Vector3f _delay_element_2{0.0f, 0.0f, 0.0f};	// buffered sample -2
+
+    float _delay_element_1_v{0};
+    float _delay_element_2_v{0};
 };
 
 } // namespace math

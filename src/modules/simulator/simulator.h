@@ -225,6 +225,8 @@ private:
 	orb_advert_t _flow_pub{nullptr};
 	orb_advert_t _irlock_report_pub{nullptr};
 	orb_advert_t _visual_odometry_pub{nullptr};
+    //orb_advert_t _mavlink_log_pub{nullptr}; //added by caosu
+
 
 	uORB::Subscription	_parameter_update_sub{ORB_ID(parameter_update)};
 

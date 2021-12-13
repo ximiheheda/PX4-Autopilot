@@ -42,8 +42,10 @@
 #include <px4_module_params.h>
 #include <uORB/uORB.h>
 #include <uORB/PublicationMulti.hpp>
+#include <uORB/Publication.hpp>
 #include <uORB/topics/sensor_gyro.h>
 #include <uORB/topics/sensor_gyro_control.h>
+//#include <uORB/topics/hil_sensor_debug_gyro.h>
 
 class PX4Gyroscope : public cdev::CDev, public ModuleParams
 {
@@ -70,7 +72,9 @@ private:
 	void configure_filter(float cutoff_freq) { _filter.set_cutoff_frequency(_sample_rate, cutoff_freq); }
 
 	uORB::PublicationMultiData<sensor_gyro_s>		_sensor_gyro_pub;
+    //uORB::Publication<hil_sensor_debug_gyro_s>      _hil_sensor_gyro_pub{ORB_ID(hil_sensor_debug_gyro)};
 	uORB::PublicationMultiData<sensor_gyro_control_s>	_sensor_gyro_control_pub;
+    orb_advert_t _mavlink_log_pub{nullptr};
 
 	math::LowPassFilter2pVector3f _filter{1000, 100};
 	Integrator _integrator{4000, true};

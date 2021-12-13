@@ -50,6 +50,8 @@
 #include <mathlib/mathlib.h>
 
 #include <limits>
+//#include <systemlib/mavlink_log.h> //added by caosu
+
 
 #ifdef ENABLE_UART_RC_INPUT
 #ifndef B460800
@@ -291,6 +293,7 @@ void Simulator::update_gps(const mavlink_hil_gps_t *gps_sim)
 
 void Simulator::handle_message(const mavlink_message_t *msg)
 {
+    //mavlink_log_info(&_mavlink_log_pub, "msg->msgid:%d",msg->msgid);
 	switch (msg->msgid) {
 	case MAVLINK_MSG_ID_HIL_SENSOR:
 		handle_message_hil_sensor(msg);
@@ -403,7 +406,8 @@ void Simulator::handle_message_hil_sensor(const mavlink_message_t *msg)
 
 void Simulator::handle_message_hil_state_quaternion(const mavlink_message_t *msg)
 {
-	mavlink_hil_state_quaternion_t hil_state;
+    //mavlink_log_info(&_mavlink_log_pub, "handle_message_hil_state_quaternion~~~");
+    mavlink_hil_state_quaternion_t hil_state;
 	mavlink_msg_hil_state_quaternion_decode(msg, &hil_state);
 
 	uint64_t timestamp = hrt_absolute_time();
@@ -779,6 +783,8 @@ void Simulator::poll_for_MAVLink_messages()
 
 	// Request HIL_STATE_QUATERNION for ground truth.
 	request_hil_state_quaternion();
+
+
 
 	while (true) {
 

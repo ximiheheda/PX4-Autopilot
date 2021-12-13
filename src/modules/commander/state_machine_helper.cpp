@@ -770,7 +770,7 @@ bool check_invalid_pos_nav_state(vehicle_status_s *status, bool old_failsafe, or
 		}
 
 		if (using_global_pos) {
-			enable_failsafe(status, old_failsafe, mavlink_log_pub, reason_no_global_position);
+            enable_failsafe(status, old_failsafe, mavlink_log_pub, reason_no_global_position); //edited by caosu
 
 		} else {
 			enable_failsafe(status, old_failsafe, mavlink_log_pub, reason_no_local_position);

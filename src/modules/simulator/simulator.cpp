@@ -53,6 +53,7 @@
 #include <drivers/drv_board_led.h>
 
 #include "simulator.h"
+//#include <systemlib/mavlink_log.h> //added by caosu
 
 using namespace simulator;
 

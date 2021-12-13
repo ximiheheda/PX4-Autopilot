@@ -555,7 +555,8 @@ Navigator::run()
 						} else {
 							if (rtl_activated) {
 								mavlink_and_console_log_info(get_mavlink_log_pub(), "RTL Mission activated, fly to home");
-							}
+                            }
+
 
 							navigation_mode_new = &_rtl;
 						}
@@ -573,7 +574,8 @@ Navigator::run()
 				}
 
 				break;
-			}
+            }
+
 
 		case vehicle_status_s::NAVIGATION_STATE_AUTO_TAKEOFF:
 			_pos_sp_triplet_published_invalid_once = false;

@@ -485,6 +485,8 @@ int commander_main(int argc, char *argv[])
 			} else {
 				PX4_ERR("argument %s unsupported.", argv[2]);
 			}
+            //mavlink_log_info(&mavlink_log_pub, "the current main state is: %s", new_main_state); //added by caosu
+
 
 			if (TRANSITION_DENIED == main_state_transition(status, new_main_state, status_flags, &internal_state)) {
 				PX4_ERR("mode change failed");
@@ -626,9 +628,10 @@ Commander::handle_command(vehicle_status_s *status_local, const vehicle_command_
 
 	/* result of the command */
 	unsigned cmd_result = vehicle_command_s::VEHICLE_CMD_RESULT_UNSUPPORTED;
+    //mavlink_log_critical(&mavlink_log_pub, "Current command: %d",cmd.command); //added by caosu
 
 	/* request to set different system mode */
-	switch (cmd.command) {
+    switch (cmd.command) {
 	case vehicle_command_s::VEHICLE_CMD_DO_REPOSITION: {
 
 			// Just switch the flight mode here, the navigator takes care of
@@ -687,6 +690,8 @@ Commander::handle_command(vehicle_status_s *status_local, const vehicle_command_
 					/* AUTO */
 					if (custom_sub_mode > 0) {
 						reset_posvel_validity(changed);
+                        //mavlink_log_info(&mavlink_log_pub, "Current command: %d",custom_sub_mode); //added by caosu
+
 
 						switch (custom_sub_mode) {
 						case PX4_CUSTOM_SUB_MODE_AUTO_LOITER:
@@ -707,7 +712,8 @@ Commander::handle_command(vehicle_status_s *status_local, const vehicle_command_
 
 						case PX4_CUSTOM_SUB_MODE_AUTO_RTL:
 							main_ret = main_state_transition(*status_local, commander_state_s::MAIN_STATE_AUTO_RTL, status_flags, &internal_state);
-							break;
+                            mavlink_log_info(&mavlink_log_pub, "Switch to RTL mode %s", main_ret!=TRANSITION_DENIED?"successfully":"failly");
+                            break;
 
 						case PX4_CUSTOM_SUB_MODE_AUTO_TAKEOFF:
 							main_ret = main_state_transition(*status_local, commander_state_s::MAIN_STATE_AUTO_TAKEOFF, status_flags,
@@ -1553,7 +1559,7 @@ Commander::run()
 					/*
 					 * apparently the USB cable went away but we are still powered,
 					 * so lets reset to a classic non-usb state.
-					 */
+                     */
 					mavlink_log_critical(&mavlink_log_pub, "USB disconnected, rebooting.")
 					px4_usleep(400000);
 					px4_shutdown_request(true, false);
@@ -1701,7 +1707,7 @@ Commander::run()
 				}
 
 				if (_auto_disarm_landed.get_state()) {
-					arm_disarm(false, true, &mavlink_log_pub, "Auto disarm initiated");
+                    //arm_disarm(false, true, &mavlink_log_pub, "Auto disarm initiated"); commented by caosu
 				}
 			}
 
@@ -1864,6 +1870,8 @@ Commander::run()
 			// reset if no longer in RTL or if manually switched to RTL
 			const bool in_rtl_mode = internal_state.main_state == commander_state_s::MAIN_STATE_AUTO_RTL;
 			const bool manual_return_switch_on = sp_man.return_switch == manual_control_setpoint_s::SWITCH_POS_ON;
+
+            // this is the place to consider, added by caosu
 
 			if (!in_rtl_mode || manual_return_switch_on) {
 				_geofence_rtl_on = false;
@@ -2189,11 +2197,13 @@ Commander::run()
 		}
 
 		/* handle commands last, as the system needs to be updated to handle them */
+
 		if (cmd_sub.updated()) {
 			vehicle_command_s cmd{};
 
 			/* got command */
 			cmd_sub.copy(&cmd);
+            //mavlink_log_critical(&mavlink_log_pub, "Current command: %d",cmd.command); //added by caosu
 
 			/* handle it */
 			if (handle_command(&status, cmd, &armed, command_ack_pub, &status_changed)) {
@@ -2625,12 +2635,25 @@ control_status_leds(vehicle_status_s *status_local, const actuator_armed_s *actu
 transition_result_t
 Commander::set_main_state(const vehicle_status_s &status_local, bool *changed)
 {
-	if (safety.override_available && safety.override_enabled) {
-		return set_main_state_override_on(status_local, changed);
-
+    if(sp_man.return_switch == manual_control_setpoint_s::SWITCH_POS_ON ||
+       sp_man.stab_switch == manual_control_setpoint_s::SWITCH_POS_ON)
+    {
+        return set_main_state_rc(status_local, changed);
+    }
+    else if(safety.override_available && safety.override_enabled)
+    {
+        return set_main_state_override_on(status_local, changed);
+    }
+    else
+    {
+        return set_main_state_rc(status_local, changed);
+    }
+    /*if (safety.override_available && safety.override_enabled) {
+        //mavlink_log_info(&mavlink_log_pub, "safety.override_available && safety.override_enabled"); //added by caosu
+        return set_main_state_override_on(status_local, changed);
 	} else {
 		return set_main_state_rc(status_local, changed);
-	}
+    }*/
 }
 
 transition_result_t
@@ -2668,6 +2691,13 @@ Commander::set_main_state_rc(const vehicle_status_s &status_local, bool *changed
 		|| (_last_sp_man.mode_slot != sp_man.mode_slot)
 		|| (_last_sp_man.stab_switch != sp_man.stab_switch)
 		|| (_last_sp_man.man_switch != sp_man.man_switch);
+
+    /*if(some_switch_changed == 1)
+    {
+        mavlink_log_info(&mavlink_log_pub, "some switch changed!"); //added by caosu
+    }
+    mavlink_log_info(&mavlink_log_pub, "sp_man.return_switch:%d",sp_man.return_switch); //added by caosu
+    */
 
 	// only switch mode based on RC switch if necessary to also allow mode switching via MAVLink
 	const bool should_evaluate_rc_mode_switch = first_time_rc
@@ -2723,7 +2753,9 @@ Commander::set_main_state_rc(const vehicle_status_s &status_local, bool *changed
 
 	/* RTL switch overrides main switch */
 	if (sp_man.return_switch == manual_control_setpoint_s::SWITCH_POS_ON) {
+        //Here, the return switch is mapped to the slot we set in the QGC
 		res = main_state_transition(status_local, commander_state_s::MAIN_STATE_AUTO_RTL, status_flags, &internal_state);
+        //mavlink_log_info(&mavlink_log_pub, "RTL switch overrides main switch : %d", res); //added by caosu
 
 		if (res == TRANSITION_DENIED) {
 			print_reject_mode("AUTO RTL");

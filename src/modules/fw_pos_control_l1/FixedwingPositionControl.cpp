@@ -1938,7 +1938,7 @@ FixedwingPositionControl::tecs_update_pitch_throttle(float alt_sp, float airspee
 
     if(_vehicle_cmd.command == vehicle_command_s::VEHICLE_CMD_DO_ACROBATIC && _acrobatic_cmd.acrobatic_finish != true)
     {
-        pitch_for_tecs = _acrobatic_cmd.euler_cmd[0];
+       pitch_for_tecs = _acrobatic_cmd.euler_cmd[0];
         alt_sp = _acrobatic_cmd.alt_sp_acrobatic;
 
         airspeed_sp *=  (float)1;//1.20;

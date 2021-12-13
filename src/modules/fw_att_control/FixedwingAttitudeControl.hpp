@@ -67,6 +67,14 @@
 #include <uORB/topics/vehicle_status.h>
 #include <uORB/topics/vehicle_command.h>
 #include <uORB/topics/acrobatic_cmd.h>
+#include <uORB/topics/acrobaticL1_cmd.h>
+//#include <uORB/topics/manual_status.h>
+//#include <uORB/topics/model_iden_data.h>
+
+
+#include <matrix/matrix/math.hpp>
+#include <mathlib/math/filter/LowPassFilter2pVector3f.hpp>
+#include <mathlib/math/Limits.hpp>
 
 using matrix::Eulerf;
 using matrix::Quatf;
@@ -112,12 +120,15 @@ private:
     uORB::Subscription _vehicle_cmd_sub{ORB_ID(vehicle_command)}; //added by caosu
     //uORB::Publication<acrobatic_control_s>      _acro_control_pub{ORB_ID(acrobatic_control)}; //added by caosu
     uORB::Subscription _acrobatic_cmd_sub{ORB_ID(acrobatic_cmd)};
+    uORB::Subscription _acrobaticL1_cmd_sub{ORB_ID(acrobaticL1_cmd)};
 
 	uORB::SubscriptionData<airspeed_s> _airspeed_sub{ORB_ID(airspeed)};
 
 	uORB::Publication<actuator_controls_s>		_actuators_2_pub{ORB_ID(actuator_controls_2)};		/**< actuator control group 1 setpoint (Airframe) */
 	uORB::Publication<vehicle_rates_setpoint_s>	_rate_sp_pub{ORB_ID(vehicle_rates_setpoint)};		/**< rate setpoint publication */
 	uORB::PublicationMulti<rate_ctrl_status_s>	_rate_ctrl_status_pub{ORB_ID(rate_ctrl_status)};	/**< rate controller status publication */
+    //uORB::Publication<manual_status_s>          _man_pub{ORB_ID(manual_status)};
+
 
 	orb_id_t	_attitude_setpoint_id{nullptr};
 	orb_advert_t	_attitude_sp_pub{nullptr};	/**< attitude setpoint point */
@@ -135,6 +146,7 @@ private:
 	vehicle_rates_setpoint_s		_rates_sp {};		/* attitude rates setpoint */
 	vehicle_status_s			_vehicle_status {};	/**< vehicle status */
     acrobatic_cmd_s             _acrobatic_cmd {}; /**< acrobatic cmd */
+    acrobaticL1_cmd_s           _acrobaticL1_cmd {}; /**< acrobaticL1 cmd*/
 
 	perf_counter_t	_loop_perf;			/**< loop performance counter */
 
@@ -212,7 +224,11 @@ private:
 		float man_pitch_scale;			/**< scale factor applied to pitch actuator control in pure manual mode */
 		float man_yaw_scale; 			/**< scale factor applied to yaw actuator control in pure manual mode */
 
-		float acro_max_x_rate_rad;
+
+        float r_d; //added by caosu
+        float acro_rr_p; //added by caosu
+        float acro_pr_p; //added by caosu
+        float acro_max_x_rate_rad;
 		float acro_max_y_rate_rad;
 		float acro_max_z_rate_rad;
 
@@ -221,7 +237,7 @@ private:
 		float flaps_land_scale;			/**< Scale factor for flaps on landing */
 		float flaperon_scale;			/**< Scale factor for flaperons */
 
-		float rattitude_thres;
+        float rattitude_thres;
 
 		int32_t bat_scale_en;			/**< Battery scaling enabled */
 		bool airspeed_disabled;
@@ -280,6 +296,10 @@ private:
 		param_t man_pitch_scale;
 		param_t man_yaw_scale;
 
+        param_t acro_rr_p;
+        param_t r_d;
+        param_t acro_pr_p;
+
 		param_t acro_max_x_rate;
 		param_t acro_max_y_rate;
 		param_t acro_max_z_rate;
@@ -309,12 +329,44 @@ private:
 	int		parameters_update();
 
 	void		vehicle_control_mode_poll();
-	void		vehicle_manual_poll();
+    void		vehicle_manual_poll();
 	void		vehicle_attitude_setpoint_poll();
 	void		vehicle_rates_setpoint_poll();
 	void		vehicle_status_poll();
 	void		vehicle_land_detected_poll();
     void        acrobatic_cmd_poll();
+    void        acrobaticL1_cmd_poll();
 
-	float 		get_airspeed_and_update_scaling();
+    float 		get_airspeed_and_update_scaling();
+
+    math::LowPassFilter2pVector3f _lp_filters_d{0.f, 0.f}; ///< low-pass filters for D-term (roll, pitch & yaw) added by caosu
+    math::LowPassFilter2pVector3f _lp_filters_dd{0.f, 0.f};
+    matrix::Vector3f angular_rate_filt;
+    matrix::Vector3f angular_rate_filt_pre;
+    matrix::Vector3f angular_rate_filt_pre_pre;
+    matrix::Vector3f angular_acc_filt;
+
+
+
+
+
+
+    hrt_abstime time_prev{0};
+    float _rate_prev_filtered;
+    float rate_d;
+    float rate_filtered;
+    float roll_r_filt;
+    float roll_r_filt_pre;
+    float roll_r_d;
+    float pitch_r_filt;
+    float pitch_r_filt_pre;
+    float pitch_r_d;
+    float yaw_r_filt;
+    float yaw_r_filt_pre;
+    float yaw_r_d;
+    //manual_status_s man_status;
+
+
+    orb_advert_t _mavlink_log_pub{nullptr};
+
 };

@@ -61,6 +61,7 @@
 #include <uORB/topics/vehicle_air_data.h>
 #include <uORB/topics/vehicle_magnetometer.h>
 #include <uORB/topics/subsystem_info.h>
+//#include <uORB/topics/hil_sensor_debug_voted.h>
 
 #include <DevMgr.hpp>
 
@@ -251,6 +252,8 @@ private:
 
 	uORB::Publication<sensor_correction_s>	_sensor_correction_pub{ORB_ID(sensor_correction)};	/**< handle to the sensor correction uORB topic */
 	uORB::Publication<sensor_selection_s>	_sensor_selection_pub{ORB_ID(sensor_selection)};	/**< handle to the sensor selection uORB topic */
+
+    //uORB::Publication<hil_sensor_debug_voted_s>      _hil_sensor_pub{ORB_ID(hil_sensor_debug_voted)}; //added by caosu
 
 	sensor_combined_s _last_sensor_data[SENSOR_COUNT_MAX] {};	/**< latest sensor data from all sensors instances */
 	vehicle_air_data_s _last_airdata[SENSOR_COUNT_MAX] {};		/**< latest sensor data from all sensors instances */

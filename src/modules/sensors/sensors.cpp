@@ -83,6 +83,7 @@
 #include <uORB/topics/sensor_preflight.h>
 #include <uORB/topics/vehicle_air_data.h>
 #include <uORB/topics/vehicle_magnetometer.h>
+//#include <uORB/topics/hil_sensor_debug_voted_sensor.h>
 
 #include <DevMgr.hpp>
 
@@ -143,6 +144,7 @@ private:
 	uORB::Subscription	_diff_pres_sub{ORB_ID(differential_pressure)};			/**< raw differential pressure subscription */
 	uORB::Subscription	_parameter_update_sub{ORB_ID(parameter_update)};				/**< notification of parameter updates */
 	uORB::Subscription	_vcontrol_mode_sub{ORB_ID(vehicle_control_mode)};		/**< vehicle control mode subscription */
+    //uORB::Publication<hil_sensor_debug_voted_sensor_s>      _hil_sensor_pub{ORB_ID(hil_sensor_debug_voted_sensor)}; //added by caosu
 
 	uORB::Publication<airspeed_s>			_airspeed_pub{ORB_ID(airspeed)};			/**< airspeed */
 	uORB::Publication<sensor_combined_s>		_sensor_pub{ORB_ID(sensor_combined)};			/**< combined sensor data topic */
@@ -487,6 +489,14 @@ Sensors::run()
 
 		_voted_sensors_update.sensorsPoll(raw, airdata, magnetometer);
 
+        //hil_sensor_debug_voted_sensor_s hil_sensor{};
+        //hil_sensor.timestamp = airdata.timestamp;
+        //hil_sensor.gyro_rad[0] = raw.gyro_rad[0];
+        //hil_sensor.gyro_rad[1] = raw.gyro_rad[1];
+        //hil_sensor.gyro_rad[2] = raw.gyro_rad[2];
+        //hil_sensor.integrate_t = raw.gyro_integral_dt;
+        //_hil_sensor_pub.publish(hil_sensor);
+
 		/* check analog airspeed */
 		adc_poll();
 
@@ -497,6 +507,7 @@ Sensors::run()
 			_voted_sensors_update.setRelativeTimestamps(raw);
 
 			_sensor_pub.publish(raw);
+
 
 			if (airdata.timestamp != airdata_prev_timestamp) {
 				_airdata_pub.publish(airdata);

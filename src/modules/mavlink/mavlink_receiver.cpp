@@ -46,6 +46,7 @@
 #include <drivers/drv_rc_input.h>
 #include <drivers/drv_tone_alarm.h>
 #include <ecl/geo/geo.h>
+//#include <systemlib/mavlink_log.h>
 
 #ifdef CONFIG_NET
 #include <net/if.h>
@@ -263,15 +264,17 @@ MavlinkReceiver::handle_message(mavlink_message_t *msg)
 		switch (msg->msgid) {
 		case MAVLINK_MSG_ID_HIL_SENSOR:
 			handle_message_hil_sensor(msg);
+            //mavlink_log_info(&_mavlink_log_pub, "publishing hil_sensor in hil state~~~~~");
 			break;
 
 		case MAVLINK_MSG_ID_HIL_STATE_QUATERNION:
 			handle_message_hil_state_quaternion(msg);
+            //mavlink_log_info(&_mavlink_log_pub, "publishing hil_state_quaternion in hil state~~~~~");
 			break;
 
 		case MAVLINK_MSG_ID_HIL_OPTICAL_FLOW:
 			handle_message_hil_optical_flow(msg);
-			break;
+            break;
 
 		default:
 			break;
@@ -2025,8 +2028,15 @@ MavlinkReceiver::handle_message_hil_sensor(mavlink_message_t *msg)
 		gyro.y = imu.ygyro;
 		gyro.z = imu.zgyro;
 		gyro.temperature = imu.temperature;
-
+        //mavlink_log_info(&_mavlink_log_pub, "gyro:%f\t%f\t%f",(double)gyro.x,(double)gyro.y,(double)gyro.z);
 		_gyro_pub.publish(gyro);
+        //hil_sensor_debug_s hil_sensor{};
+        //hil_sensor.timestamp = timestamp;
+        //hil_sensor.imu_gyro[0] = gyro.x;
+        //hil_sensor.imu_gyro[1] = gyro.y;
+        //hil_sensor.imu_gyro[2] = gyro.z;
+        //hil_sensor.gyro_timestamp = timestamp;
+        //_hil_sensor_pub.publish(hil_sensor);
 	}
 
 	/* accelerometer */
@@ -2427,6 +2437,7 @@ MavlinkReceiver::handle_message_hil_state_quaternion(mavlink_message_t *msg)
 		gyro.y = hil_state.pitchspeed;
 		gyro.z = hil_state.yawspeed;
 		gyro.temperature = 25.0f;
+        //mavlink_log_info(&_mavlink_log_pub, "publishing gyro in hil state~~~~~");
 
 		_gyro_pub.publish(gyro);
 	}

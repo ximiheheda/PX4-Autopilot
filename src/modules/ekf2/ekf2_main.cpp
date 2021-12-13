@@ -77,6 +77,9 @@
 #include <uORB/topics/vehicle_odometry.h>
 #include <uORB/topics/vehicle_status.h>
 #include <uORB/topics/wind_estimate.h>
+//#include <uORB/topics/hil_sensor_debug_ekf.h>
+//#include <systemlib/mavlink_log.h>
+
 
 #include "Utility/PreFlightChecker.hpp"
 
@@ -117,6 +120,7 @@ public:
 
 private:
 	int getRangeSubIndex(); ///< get subscription index of first downward-facing range sensor
+    //orb_advert_t _mavlink_log_pub{nullptr};//added by caosu
 
 	PreFlightChecker _preflt_checker;
 	void runPreFlightChecks(float dt, const filter_control_status_u &control_status,
@@ -267,6 +271,8 @@ private:
 	sensor_selection_s		_sensor_selection{};
 	vehicle_land_detected_s		_vehicle_land_detected{};
 	vehicle_status_s		_vehicle_status{};
+
+    //uORB::Publication<hil_sensor_debug_ekf_s>           _hil_sensor_pub{ORB_ID(hil_sensor_debug_ekf)};
 
 	uORB::Publication<ekf2_innovations_s>			_estimator_innovations_pub{ORB_ID(ekf2_innovations)};
 	uORB::Publication<ekf2_timestamps_s>			_ekf2_timestamps_pub{ORB_ID(ekf2_timestamps)};
@@ -778,6 +784,18 @@ void Ekf2::Run()
 		imu_sample_new.delta_ang = Vector3f{sensors.gyro_rad} * imu_sample_new.delta_ang_dt;
 		imu_sample_new.delta_vel_dt = sensors.accelerometer_integral_dt * 1.e-6f;
 		imu_sample_new.delta_vel = Vector3f{sensors.accelerometer_m_s2} * imu_sample_new.delta_vel_dt;
+
+        //hil_sensor_debug_ekf_s hil_sensor{};
+        //hil_sensor.timestamp = now;
+        //hil_sensor.delta_ang[0] = imu_sample_new.delta_ang(0);
+        //hil_sensor.delta_ang[1] = imu_sample_new.delta_ang(1);
+        //hil_sensor.delta_ang[2] = imu_sample_new.delta_ang(2);
+        //hil_sensor.delta_ang_dt = imu_sample_new.delta_ang_dt;
+        //hil_sensor.gyro_rad[0] = sensors.gyro_rad[0];
+        //hil_sensor.gyro_rad[1] = sensors.gyro_rad[1];
+        //hil_sensor.gyro_rad[2] = sensors.gyro_rad[2];
+        //_hil_sensor_pub.publish(hil_sensor);
+
 
 		_ekf.setIMUData(imu_sample_new);
 
@@ -1722,9 +1740,11 @@ bool Ekf2::publish_attitude(const sensor_combined_s &sensors, const hrt_abstime 
 		// generate vehicle attitude quaternion data
 		vehicle_attitude_s att;
 		att.timestamp = now;
+        //mavlink_log_info(&_mavlink_log_pub, "calculate_quaternion~~~");
 
 		const Quatf q{_ekf.calculate_quaternion()};
 		q.copyTo(att.q);
+        //mavlink_log_info(&_mavlink_log_pub, "q0:%f\tq1:%f\tq2:%f\tq3:%f",(double)att.q[0],(double)att.q[1],(double)att.q[2],(double)att.q[3]);
 
 		_ekf.get_quat_reset(&att.delta_q_reset[0], &att.quat_reset_counter);
 

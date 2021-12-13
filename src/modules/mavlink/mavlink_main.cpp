@@ -1600,11 +1600,15 @@ Mavlink::configure_streams_to_default(const char *configure_single_stream)
 
 	const float unlimited_rate = -1.0f;
 
+    //mavlink_log_info(&_mavlink_log_pub, "mode: %s", _mode);
+
+
 	switch (_mode) {
 	case MAVLINK_MODE_NORMAL:
+        mavlink_log_info(&_mavlink_log_pub, "MAVLINK_MODE_NORMAL");
 		configure_stream_local("ADSB_VEHICLE", unlimited_rate);
 		configure_stream_local("ALTITUDE", 1.0f);
-		configure_stream_local("ATTITUDE", 15.0f);
+        configure_stream_local("ATTITUDE", 15.0f); //added by caosu default: 15.0f
 		configure_stream_local("ATTITUDE_TARGET", 2.0f);
 		configure_stream_local("BATTERY_STATUS", 0.5f);
 		configure_stream_local("CAMERA_IMAGE_CAPTURED", unlimited_rate);
@@ -1636,11 +1640,12 @@ Mavlink::configure_streams_to_default(const char *configure_single_stream)
 		break;
 
 	case MAVLINK_MODE_ONBOARD:
+        mavlink_log_info(&_mavlink_log_pub, "MAVLINK_MODE_ONBOARD");
 		configure_stream_local("ACTUATOR_CONTROL_TARGET0", 10.0f);
 		configure_stream_local("ADSB_VEHICLE", unlimited_rate);
 		configure_stream_local("ALTITUDE", 10.0f);
 		configure_stream_local("ATTITUDE", 100.0f);
-		configure_stream_local("ATTITUDE_QUATERNION", 50.0f);
+        configure_stream_local("ATTITUDE_QUATERNION", 50.0f); //added by caosu default: 50.0f
 		configure_stream_local("ATTITUDE_TARGET", 10.0f);
 		configure_stream_local("BATTERY_STATUS", 0.5f);
 		configure_stream_local("CAMERA_CAPTURE", 2.0f);
@@ -1679,11 +1684,13 @@ Mavlink::configure_streams_to_default(const char *configure_single_stream)
 		break;
 
 	case MAVLINK_MODE_EXTVISION:
+        mavlink_log_info(&_mavlink_log_pub, "MAVLINK_MODE_EXTVISION");
 		configure_stream_local("HIGHRES_IMU", unlimited_rate);		// for VIO
 		configure_stream_local("TIMESYNC", 10.0f);
 
 	// FALLTHROUGH
 	case MAVLINK_MODE_EXTVISIONMIN:
+        mavlink_log_info(&_mavlink_log_pub, "MAVLINK_MODE_EXTVISIONMIN");
 		configure_stream_local("ADSB_VEHICLE", unlimited_rate);
 		configure_stream_local("ALTITUDE", 10.0f);
 		configure_stream_local("ATTITUDE", 20.0f);
@@ -1722,6 +1729,7 @@ Mavlink::configure_streams_to_default(const char *configure_single_stream)
 
 
 	case MAVLINK_MODE_OSD:
+        mavlink_log_info(&_mavlink_log_pub, "MAVLINK_MODE_OSD");
 		configure_stream_local("ALTITUDE", 10.0f);
 		configure_stream_local("ATTITUDE", 25.0f);
 		configure_stream_local("ATTITUDE_TARGET", 10.0f);
@@ -1747,12 +1755,13 @@ Mavlink::configure_streams_to_default(const char *configure_single_stream)
 		break;
 
 	case MAVLINK_MODE_CONFIG:
+        mavlink_log_info(&_mavlink_log_pub, "MAVLINK_MODE_CONFIG");
 		// Enable a number of interesting streams we want via USB
 		configure_stream_local("ACTUATOR_CONTROL_TARGET0", 30.0f);
 		configure_stream_local("ADSB_VEHICLE", unlimited_rate);
 		configure_stream_local("ALTITUDE", 10.0f);
-		configure_stream_local("ATTITUDE", 50.0f);
-		configure_stream_local("ATTITUDE_QUATERNION", 50.0f);
+        configure_stream_local("ATTITUDE", 50.0f);              //added by caosu default 50.0f
+        configure_stream_local("ATTITUDE_QUATERNION", 50.0f);   //added by caosu default 50.0f
 		configure_stream_local("ATTITUDE_TARGET", 8.0f);
 		configure_stream_local("BATTERY_STATUS", 0.5f);
 		configure_stream_local("CAMERA_IMAGE_CAPTURED", unlimited_rate);

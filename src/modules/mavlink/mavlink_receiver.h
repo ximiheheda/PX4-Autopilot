@@ -97,6 +97,7 @@
 #include <uORB/topics/vehicle_rates_setpoint.h>
 #include <uORB/topics/vehicle_status.h>
 #include <uORB/topics/vehicle_trajectory_waypoint.h>
+//#include <uORB/topics/hil_sensor_debug.h>
 
 class Mavlink;
 
@@ -211,8 +212,10 @@ private:
 	MavlinkTimesync			_mavlink_timesync;
 
 	mavlink_status_t		_status{}; ///< receiver status, used for mavlink_parse_char()
+    //orb_advert_t _mavlink_log_pub{nullptr}; //added by caosu
 
 	// ORB publications
+    //uORB::Publication<hil_sensor_debug_s>      _hil_sensor_pub{ORB_ID(hil_sensor_debug)}; //added by caosu
 	uORB::Publication<actuator_controls_s>			_actuator_controls_pubs[4] {ORB_ID(actuator_controls_0), ORB_ID(actuator_controls_1), ORB_ID(actuator_controls_2), ORB_ID(actuator_controls_3)};
 	uORB::Publication<airspeed_s>				_airspeed_pub{ORB_ID(airspeed)};
 	uORB::Publication<battery_status_s>			_battery_pub{ORB_ID(battery_status)};

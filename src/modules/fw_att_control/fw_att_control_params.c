@@ -61,6 +61,13 @@
  * @increment 0.05
  * @group FW Attitude Control
  */
+
+/* added by caosu */
+
+PARAM_DEFINE_FLOAT(FW_RR_D, 0.0f);
+PARAM_DEFINE_FLOAT(FW_ACRO_RR_P, 0.1f);
+PARAM_DEFINE_FLOAT(FW_ACRO_PR_P, 0.1f);
+
 PARAM_DEFINE_FLOAT(FW_R_TC, 0.4f);
 
 /**
@@ -538,6 +545,21 @@ PARAM_DEFINE_FLOAT(FW_FLAPERON_SCL, 0.0f);
 PARAM_DEFINE_INT32(FW_ARSP_MODE, 0);
 
 /**
+ * Enable airspeed scaling
+ *
+ * This enables a logic that automatically adjusts the output of the rate controller to take
+ * into account the real torque produced by an aerodynamic control surface given
+ * the current deviation from the trim airspeed (FW_AIRSPD_TRIM).
+ *
+ * Enable when using aerodynamic control surfaces (e.g.: plane)
+ * Disable when using rotor wings (e.g.: autogyro)
+ *
+ * @boolean
+ * @group FW Attitude Control
+ */
+PARAM_DEFINE_INT32(FW_ARSP_SCALE_EN, 1);
+
+/**
  * Manual roll scale
  *
  * Scale factor applied to the desired roll actuator command in full manual mode. This parameter allows
@@ -602,7 +624,7 @@ PARAM_DEFINE_INT32(FW_BAT_SCALE_EN, 0);
  *
  * @min 45
  * @max 720
- * @unit degrees
+ * @unit deg
  * @group FW Attitude Control
  */
 PARAM_DEFINE_FLOAT(FW_ACRO_X_MAX, 90);
@@ -615,7 +637,7 @@ PARAM_DEFINE_FLOAT(FW_ACRO_X_MAX, 90);
  *
  * @min 45
  * @max 720
- * @unit degrees
+ * @unit deg
  * @group FW Attitude Control
  */
 PARAM_DEFINE_FLOAT(FW_ACRO_Y_MAX, 90);
@@ -628,7 +650,7 @@ PARAM_DEFINE_FLOAT(FW_ACRO_Y_MAX, 90);
  *
  * @min 10
  * @max 180
- * @unit degrees
+ * @unit deg
  * @group FW Attitude Control
  */
 PARAM_DEFINE_FLOAT(FW_ACRO_Z_MAX, 45);
@@ -750,3 +772,11 @@ PARAM_DEFINE_FLOAT(FW_DTRIM_R_FLPS, 0.0f);
  * @increment 0.01
  */
 PARAM_DEFINE_FLOAT(FW_DTRIM_P_FLPS, 0.0f);
+
+
+
+
+
+
+
+

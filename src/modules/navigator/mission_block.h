@@ -143,7 +143,7 @@ protected:
     	acrobatic_cmd_s _acrobatic_cmd;
 
 	uORB::Publication<actuator_controls_s>	_actuator_pub{ORB_ID(actuator_controls_2)};
-    	uORB::Subscription _acrobatic_cmd_sub{ORB_ID(acrobatic_cmd)};
+    uORB::Subscription _acrobatic_cmd_sub{ORB_ID(acrobatic_cmd)};
 
 
 

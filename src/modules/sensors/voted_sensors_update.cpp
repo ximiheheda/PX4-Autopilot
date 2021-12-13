@@ -681,6 +681,8 @@ void VotedSensorsUpdate::gyroPoll(struct sensor_combined_s &raw)
 	float *offsets[] = {_corrections.gyro_offset_0, _corrections.gyro_offset_1, _corrections.gyro_offset_2 };
 	float *scales[] = {_corrections.gyro_scale_0, _corrections.gyro_scale_1, _corrections.gyro_scale_2 };
 
+    //hil_sensor_debug_voted_s hil_sensor{};
+
 	for (int uorb_index = 0; uorb_index < _gyro.subscription_count; uorb_index++) {
 		bool gyro_updated;
 		orb_check(_gyro.subscription[uorb_index], &gyro_updated);
@@ -724,6 +726,7 @@ void VotedSensorsUpdate::gyroPoll(struct sensor_combined_s &raw)
 						     gyro_report.z_integral * dt_inv);
 
 				_last_sensor_data[uorb_index].gyro_integral_dt = gyro_report.integral_dt;
+                //mavlink_log_info(&_mavlink_log_pub, "case 1~~~");
 
 			} else {
 				//using the value instead of the integral (the integral is the prefered choice)
@@ -740,6 +743,7 @@ void VotedSensorsUpdate::gyroPoll(struct sensor_combined_s &raw)
 				// approximate the delta time using the difference in gyro data time stamps
 				_last_sensor_data[uorb_index].gyro_integral_dt =
 					(gyro_report.timestamp - _last_sensor_data[uorb_index].timestamp);
+                // mavlink_log_info(&_mavlink_log_pub, "case 2~~~"); added by caosu
 			}
 
 			// handle temperature compensation
@@ -754,6 +758,11 @@ void VotedSensorsUpdate::gyroPoll(struct sensor_combined_s &raw)
 			_last_sensor_data[uorb_index].gyro_rad[0] = gyro_rate(0);
 			_last_sensor_data[uorb_index].gyro_rad[1] = gyro_rate(1);
 			_last_sensor_data[uorb_index].gyro_rad[2] = gyro_rate(2);
+
+            //hil_sensor.integral_t = gyro_report.integral_dt;
+
+            //hil_sensor.gyro_timestamp = gyro_report.timestamp;
+            //hil_sensor.last_timestamp = _last_sensor_data[uorb_index].timestamp;
 
 			_last_sensor_data[uorb_index].timestamp = gyro_report.timestamp;
 			_gyro.voter.put(uorb_index, gyro_report.timestamp, _last_sensor_data[uorb_index].gyro_rad,
@@ -780,8 +789,17 @@ void VotedSensorsUpdate::gyroPoll(struct sensor_combined_s &raw)
 		if (_selection.gyro_device_id != _gyro_device_id[best_index]) {
 			_selection_changed = true;
 			_selection.gyro_device_id = _gyro_device_id[best_index];
-		}
+        }
+        //hil_sensor.timestamp = _last_sensor_data[best_index].timestamp;
+        //hil_sensor.gyro_rad[0] = _last_sensor_data[best_index].gyro_rad[0];
+        //hil_sensor.gyro_rad[1] = _last_sensor_data[best_index].gyro_rad[1];
+        //hil_sensor.gyro_rad[2] = _last_sensor_data[best_index].gyro_rad[2];
+        //hil_sensor.integral_t = _last_sensor_data[best_index].gyro_integral_dt;
+        //hil_sensor.raw_integral_t = raw.gyro_integral_dt;
+        //hil_sensor.best_index = best_index;
+        //_hil_sensor_pub.publish(hil_sensor);
 	}
+
 }
 
 void VotedSensorsUpdate::magPoll(vehicle_magnetometer_s &magnetometer)

@@ -35,6 +35,8 @@
 #include "PX4Gyroscope.hpp"
 
 #include <lib/drivers/device/Device.hpp>
+#include <systemlib/mavlink_log.h>
+
 
 PX4Gyroscope::PX4Gyroscope(uint32_t device_id, uint8_t priority, enum Rotation rotation) :
 	CDev(nullptr),
@@ -147,6 +149,7 @@ PX4Gyroscope::update(hrt_abstime timestamp, float x, float y, float z)
 	// Integrated values
 	matrix::Vector3f integrated_value;
 	uint32_t integral_dt = 0;
+    //hil_sensor_debug_gyro_s hil_sensor{};
 
 	if (_integrator.put(timestamp, val_calibrated, integrated_value, integral_dt)) {
 
@@ -166,6 +169,13 @@ PX4Gyroscope::update(hrt_abstime timestamp, float x, float y, float z)
 
 		poll_notify(POLLIN);
 		_sensor_gyro_pub.update();	// publish
+        //hil_sensor.xyz_integral[0] = report.x_integral;
+        //hil_sensor.xyz_integral[1] = report.y_integral;
+        //hil_sensor.xyz_integral[2] = report.z_integral;
+        //hil_sensor.integral_dt = report.integral_dt;
+        //_hil_sensor_gyro_pub.publish(hil_sensor);
+        //mavlink_log_info(&_mavlink_log_pub, "heheda ~~~~~~~~~~~~~~~~~~~~~~~~~~~");
+        //does not execute in the hil state
 	}
 }
 

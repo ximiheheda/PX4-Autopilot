@@ -33,6 +33,7 @@
 
 set(msg_files
 	acrobatic_cmd.msg
+	acrobaticL1_cmd.msg
 	actuator_armed.msg
 	actuator_controls.msg
 	actuator_direct.msg
@@ -79,7 +80,7 @@ set(msg_files
 	mission_result.msg
 	mount_orientation.msg
 	multirotor_motor_limits.msg
-	obstacle_distance.msg
+        obstacle_distance.msg
 	offboard_control_mode.msg
 	optical_flow.msg
 	orbit_status.msg
