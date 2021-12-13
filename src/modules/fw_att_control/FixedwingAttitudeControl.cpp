@@ -799,7 +799,7 @@ void FixedwingAttitudeControl::Run()
                     /**< The ordinary rate controllers */
                     /* Update input data for rate controllers */
                     // added by caosu
-                    //acrobatic_cmd_poll();
+                    acrobatic_cmd_poll();
                     //acrobaticL1_cmd_poll();
                     /***********************Calculate the rate difference*************************/
 
@@ -834,15 +834,22 @@ void FixedwingAttitudeControl::Run()
                         control_input.body_r_setpoint = _acrobatic_cmd.body_rates_cmd[2];
                         control_input.roll_acc_filter = rate_filtered;
                     }*/ //comment here to enable the acrobatic_L1 mission, caosu, 20211209
-                    if(_vehicle_cmd.command == vehicle_command_s::VEHICLE_CMD_DO_ACROBATIC && _acrobaticL1_cmd.acrobatic_finish != true)
+                    _sensor_com_sub.update(&_sensor_com);
+
+                    if(_vehicle_cmd.command == vehicle_command_s::VEHICLE_CMD_DO_ACROBATIC && _acrobatic_cmd.acrobatic_finish != true)
                     {
                         control_input.do_acrobatic = 1;
-                        control_input.acc_y_setpoint = -10;//_acrobaticL1_cmd.acc_y_setpoint;
-                        control_input.acc_z_setpoint = -10;//_acrobaticL1_cmd.acc_z_setpoint;
-                        control_input.roll_rate_setpoint = _roll_ctrl.get_desired_rate();
-                        control_input.pitch_rate_setpoint = _pitch_ctrl.get_desired_rate();
-                        control_input.yaw_rate_setpoint = _yaw_ctrl.get_desired_rate();
-                        mavlink_log_info(&_mavlink_log_pub, "start acrobatic ~~~");
+                        control_input.acc_y_setpoint = 0;//_acrobaticL1_cmd.acc_y_setpoint;
+                        control_input._acc_z_real = (float)_sensor_com.accelerometer_m_s2[2];
+                        control_input.acc_z_setpoint = _acrobatic_cmd.accel_z_cmd;//float(-9.8 + 2*sin(hrt_absolute_time()/1e6));//_acrobaticL1_cmd.acc_z_setpoint;
+
+                        //control_input.roll_rate_setpoint = _roll_ctrl.get_desired_rate();
+                        //control_input.pitch_rate_setpoint = _pitch_ctrl.get_desired_rate();
+                        //control_input.yaw_rate_setpoint = _yaw_ctrl.get_desired_rate();
+                        control_input.body_p_setpoint = _acrobatic_cmd.body_rates_cmd[0];
+                        //control_input.body_q_setpoint = _acrobatic_cmd.body_rates_cmd[1];
+                        control_input.body_r_setpoint = _acrobatic_cmd.body_rates_cmd[2];
+                        mavlink_log_info(&_mavlink_log_pub, "acc_z_error:%lf",(double)(control_input.acc_z_setpoint-control_input._acc_z_real));
                     }
 
                     else
@@ -852,6 +859,7 @@ void FixedwingAttitudeControl::Run()
                         control_input.roll_rate_setpoint = _roll_ctrl.get_desired_rate();
                         control_input.pitch_rate_setpoint = _pitch_ctrl.get_desired_rate();
                         control_input.yaw_rate_setpoint = _yaw_ctrl.get_desired_rate();
+                        mavlink_log_info(&_mavlink_log_pub, "no acrobatic ~~~");
                         //control_input.roll_acc_filter = rate_filtered;
                     }
                     //_acrobatic_cmd.control_input_pqr[0] = control_input.body_p_setpoint;

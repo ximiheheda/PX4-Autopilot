@@ -70,6 +70,7 @@
 #include <uORB/topics/acrobaticL1_cmd.h>
 //#include <uORB/topics/manual_status.h>
 //#include <uORB/topics/model_iden_data.h>
+#include <uORB/topics/sensor_combined.h>
 
 
 #include <matrix/matrix/math.hpp>
@@ -123,6 +124,8 @@ private:
     uORB::Subscription _acrobaticL1_cmd_sub{ORB_ID(acrobaticL1_cmd)};
 
 	uORB::SubscriptionData<airspeed_s> _airspeed_sub{ORB_ID(airspeed)};
+    uORB::Subscription _sensor_com_sub{ORB_ID(sensor_combined)}; //Obtain the combined sensor data
+    sensor_combined_s _sensor_com{}; //The combined sensor
 
 	uORB::Publication<actuator_controls_s>		_actuators_2_pub{ORB_ID(actuator_controls_2)};		/**< actuator control group 1 setpoint (Airframe) */
 	uORB::Publication<vehicle_rates_setpoint_s>	_rate_sp_pub{ORB_ID(vehicle_rates_setpoint)};		/**< rate setpoint publication */

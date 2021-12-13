@@ -7,3 +7,4 @@ float32[3] control_input_pqr            # the control input p,q,r
 float32    control_input_th             # the control input throttle
 float32    alt_sp_acrobatic             # altitude sepoint acrobatic
 float32[3] euler_cmd                    # euler angles setpoint acrobatic
+float32    accel_z_cmd			# acceleration a direction
