@@ -76,6 +76,7 @@
 #include <matrix/matrix/math.hpp>
 #include <mathlib/math/filter/LowPassFilter2pVector3f.hpp>
 #include <mathlib/math/Limits.hpp>
+#include <uORB/topics/vehicle_local_position.h>
 
 using matrix::Eulerf;
 using matrix::Quatf;
@@ -150,6 +151,7 @@ private:
 	vehicle_status_s			_vehicle_status {};	/**< vehicle status */
     acrobatic_cmd_s             _acrobatic_cmd {}; /**< acrobatic cmd */
     acrobaticL1_cmd_s           _acrobaticL1_cmd {}; /**< acrobaticL1 cmd*/
+    vehicle_local_position_s _local_pos{};			/**< vehicle local position */
 
 	perf_counter_t	_loop_perf;			/**< loop performance counter */
 

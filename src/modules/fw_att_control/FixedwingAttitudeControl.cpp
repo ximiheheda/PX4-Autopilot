@@ -838,11 +838,25 @@ void FixedwingAttitudeControl::Run()
 
                     if(_vehicle_cmd.command == vehicle_command_s::VEHICLE_CMD_DO_ACROBATIC && _acrobatic_cmd.acrobatic_finish != true)
                     {
+                        matrix::Vector3f ground_speed(_global_pos.vel_n, _global_pos.vel_e,  _global_pos.vel_d);
+                        //calculate the velocity in body frame
+                        // Velocity in body frame
+                        const matrix::Dcmf R_to_body(Quatf(_att.q).inversed());
+                        const matrix::Vector3f vel = R_to_body * matrix::Vector3f(ground_speed(0), ground_speed(1), ground_speed(2));
+
+                        //const float _vel_x_real = vel(0);
+                        const float _vel_y_real = vel(1);
+                        const float _vel_z_real = vel(2);
+
                         control_input.do_acrobatic = true; //true
                         control_input.acc_y_setpoint = 0;//_acrobaticL1_cmd.acc_y_setpoint;
                         control_input._acc_z_real = (float)_sensor_com.accelerometer_m_s2[2];
                         control_input.acc_z_setpoint = _acrobatic_cmd.accel_z_cmd;//float(-9.8 + 2*sin(hrt_absolute_time()/1e6));//_acrobaticL1_cmd.acc_z_setpoint;
 
+                        control_input._vel_z_real = (float)_vel_z_real;
+                        control_input._vel_y_real = (float)_vel_y_real;
+                        control_input.vel_z_setpoint = _acrobatic_cmd.w_sp;
+                        control_input.vel_y_setpoint = _acrobatic_cmd.v_sp;
                         //control_input.roll_rate_setpoint = _roll_ctrl.get_desired_rate();
                         //control_input.pitch_rate_setpoint = _pitch_ctrl.get_desired_rate();
                         //control_input.yaw_rate_setpoint = _yaw_ctrl.get_desired_rate();
