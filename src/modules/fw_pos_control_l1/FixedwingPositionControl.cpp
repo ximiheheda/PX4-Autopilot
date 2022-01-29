@@ -734,6 +734,7 @@ FixedwingPositionControl::control_position(const Vector2f &curr_pos, const Vecto
 	float dt = 0.01f;
 
 	if (_control_position_last_called > 0) {
+        /* Obtain the dt */
 		dt = hrt_elapsed_time(&_control_position_last_called) * 1e-6f;
 	}
 
@@ -830,16 +831,18 @@ FixedwingPositionControl::control_position(const Vector2f &curr_pos, const Vecto
 			prev_wp(0) = (float)pos_sp_curr.lat;
 			prev_wp(1) = (float)pos_sp_curr.lon;
 		}
+        // mission airspeed equals airspeed trim
 
 		float mission_airspeed = _parameters.airspeed_trim;
 
 		if (PX4_ISFINITE(pos_sp_curr.cruising_speed) &&
 		    pos_sp_curr.cruising_speed > 0.1f) {
 
+         /* the current waypoint*/
 			mission_airspeed = pos_sp_curr.cruising_speed;
 		}
 
-		float mission_throttle = _parameters.throttle_cruise;
+        float mission_throttle = _parameters.throttle_cruise; // actually we don't set it
 
 		if (PX4_ISFINITE(pos_sp_curr.cruising_throttle) &&
 		    pos_sp_curr.cruising_throttle > 0.01f) {
@@ -854,6 +857,7 @@ FixedwingPositionControl::control_position(const Vector2f &curr_pos, const Vecto
 
 		} else if (pos_sp_curr.type == position_setpoint_s::SETPOINT_TYPE_POSITION) {
 			/* waypoint is a plain navigation waypoint */
+            //We call the _l1 control method
 			_l1_control.navigate_waypoints(prev_wp, curr_wp, curr_pos, nav_speed_2d);
 			_att_sp.roll_body = _l1_control.get_roll_setpoint();
 			_att_sp.yaw_body = _l1_control.nav_bearing();
@@ -1939,10 +1943,15 @@ FixedwingPositionControl::tecs_update_pitch_throttle(float alt_sp, float airspee
     if(_vehicle_cmd.command == vehicle_command_s::VEHICLE_CMD_DO_ACROBATIC && _acrobatic_cmd.acrobatic_finish != true)
     {
        pitch_for_tecs = _acrobatic_cmd.euler_cmd[0];
-        alt_sp = _acrobatic_cmd.alt_sp_acrobatic;
+       alt_sp = _acrobatic_cmd.alt_sp_acrobatic;
+       airspeed_sp = _acrobatic_cmd.airsp_sp;
 
-        airspeed_sp *=  (float)1;//1.20;
+       airspeed_sp = 50; // added by caosu
+
+       airspeed_sp *=  (float)1;//1.20;
     }
+    // Control the airspeed based on the pitch angle, altitude setpoint, airspeed setpoint
+    // added by caosu
 
 
 	_tecs.update_pitch_throttle(_R_nb, pitch_for_tecs,
