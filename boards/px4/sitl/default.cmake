@@ -47,6 +47,7 @@ px4_add_board(
 		airspeed_selector
                 acrobatic_command
                 acrobatic_L1
+		acrobatic_DQ
 
 	SYSTEMCMDS
 		#bl_update

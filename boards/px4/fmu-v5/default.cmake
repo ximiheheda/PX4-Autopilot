@@ -85,7 +85,8 @@ px4_add_board(
 		vtol_att_control
 		airspeed_selector
                 # acrobatic_command
-		acrobatic_L1
+		# acrobatic_L1
+		acrobatic_DQ
 
 	SYSTEMCMDS
 		bl_update

@@ -364,7 +364,7 @@ private:
     template <typename T>
     DualQuaternion<T> DQuatProduct(const DualQuaternion<T> dq1,
                                    const DualQuaternion<T> dq2);
-
+    matrix::Matrix<float, 8, 1> interp_1_d_pqr_uvw();
 
 
 

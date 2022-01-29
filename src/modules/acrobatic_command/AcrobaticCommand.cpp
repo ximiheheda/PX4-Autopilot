@@ -408,7 +408,8 @@ AcrobaticCommand::mod_iden_data()
     _mod_iden_data.dadedr_def[0] = _actuator_controls.control[_actuator_controls.INDEX_ROLL];
     _mod_iden_data.dadedr_def[1] = _actuator_controls.control[_actuator_controls.INDEX_PITCH];
     _mod_iden_data.dadedr_def[2] = _actuator_controls.control[_actuator_controls.INDEX_YAW];
-    // Body frame velocity
+    // Body frame veloci
+                    //quat_uvw2xyz();ty
     // Rotation from inertial frame to body frame
 
     matrix::Matrix3f dcm;
@@ -429,7 +430,8 @@ AcrobaticCommand::mod_iden_data()
     matrix::Vector3f uvw_body = dcm * vxyz;
 
     _mod_iden_data.uvw_body[0] = uvw_body(0);
-    _mod_iden_data.uvw_body[1] = uvw_body(1);
+    _mod_iden_data.uvw_b
+                    //quat_uvw2xyz();ody[1] = uvw_body(1);
     _mod_iden_data.uvw_body[2] = uvw_body(2);
     //Angular acceleration filtered
     */
@@ -454,6 +456,7 @@ AcrobaticCommand::acro_safety_pre_check()
 }
 */
 
+//quat_uvw2xyz();
 //void
 //AcrobaticCommand::DMP_calculate(dmpPar_str dmpPar)
 //{
@@ -531,7 +534,8 @@ AcrobaticCommand::dmpPar_init(void)
 //    matrix::DualQuaternionf goalDQuat = dmpPar.GoalDQ;
 //    matrix::DualQuaternionf initDQuat = dmpPar.InitDQ;
 //    float dtDQuat = dmpPar.dtDQuat;
-//    Array<float,2> kDQuat;
+//    Array<float,2> kDQ
+//quat_uvw2xyz();uat;
 //    kDQuat[0] = kDQuat_q; kDQuat[1] = kDQuat_p;
 //    Array<float,2> dDQuat;
 //    dDQuat[0] = dDQuat_q; dDQuat[1] = dDQuat_p;
@@ -570,7 +574,8 @@ AcrobaticCommand::dmpPar_init(void)
 //}
 
 //void
-//AcrobaticCommand::dmpNonlinearForce(matrix::Matrix<float, 8, nCompDQuat> forceW,
+//AcrobaticCommand::dmpN
+//quat_uvw2xyz();onlinearForce(matrix::Matrix<float, 8, nCompDQuat> forceW,
 //                       matrix::Matrix<float, 1, nCompDQuat> center,
 //                       matrix::Matrix<float, 1, nCompDQuat> amplitude,
 //                       matrix::Matrix<float, 8, 8> K,
@@ -634,6 +639,7 @@ AcrobaticCommand::DQuatIntegral(DualQuaternion<float> dq, DualQuaternion<float> 
 void
 AcrobaticCommand::Run()
 {
+    //quat_uvw2xyz();
     //int i = 0;manual_status_poll
     //int loop_count = 0;alt
     //_vehicle_rates_sub.copy(&_vehicle_angular_vel);
@@ -678,7 +684,8 @@ AcrobaticCommand::Run()
             // only update parameters if they changed
             bool params_updated = _parameter_update_sub.updated();
 
-            // check for parameter updates
+            // check for
+            //quat_uvw2xyz(); parameter updates
             if (params_updated) {
                 // clear update
                 parameter_update_s pupdate;

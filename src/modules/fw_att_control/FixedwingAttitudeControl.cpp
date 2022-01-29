@@ -838,7 +838,7 @@ void FixedwingAttitudeControl::Run()
 
                     if(_vehicle_cmd.command == vehicle_command_s::VEHICLE_CMD_DO_ACROBATIC && _acrobatic_cmd.acrobatic_finish != true)
                     {
-                        control_input.do_acrobatic = 1;
+                        control_input.do_acrobatic = true; //true
                         control_input.acc_y_setpoint = 0;//_acrobaticL1_cmd.acc_y_setpoint;
                         control_input._acc_z_real = (float)_sensor_com.accelerometer_m_s2[2];
                         control_input.acc_z_setpoint = _acrobatic_cmd.accel_z_cmd;//float(-9.8 + 2*sin(hrt_absolute_time()/1e6));//_acrobaticL1_cmd.acc_z_setpoint;
@@ -855,11 +855,11 @@ void FixedwingAttitudeControl::Run()
                     else
                     {
                         //mavlink_log_info("fw_att: not_do_acrobatic");
-                        control_input.do_acrobatic = 0;
+                        control_input.do_acrobatic = false;
                         control_input.roll_rate_setpoint = _roll_ctrl.get_desired_rate();
                         control_input.pitch_rate_setpoint = _pitch_ctrl.get_desired_rate();
                         control_input.yaw_rate_setpoint = _yaw_ctrl.get_desired_rate();
-                        mavlink_log_info(&_mavlink_log_pub, "no acrobatic ~~~");
+                        //mavlink_log_info(&_mavlink_log_pub, "no acrobatic ~~~");
                         //control_input.roll_acc_filter = rate_filtered;
                     }
                     //_acrobatic_cmd.control_input_pqr[0] = control_input.body_p_setpoint;
