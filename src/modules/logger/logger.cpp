@@ -509,6 +509,8 @@ bool Logger::copy_if_updated(int sub_idx, void *buffer, bool try_to_subscribe)
 void Logger::add_default_topics()
 {
     add_topic("acrobatic_cmd", 10);  //added by caosu
+    add_topic("acrobatic_debug", 10); //added by caosu
+    add_topic("acrobatic_demo", 10); //added by caosu
     //add_topic("model_iden_data", 10); //added by caosu, in 01.07.2021
     //add_topic("manual_status", 10);  //added by caosu
     //add_topic("hil_sensor_debug", 100); //added by caosu

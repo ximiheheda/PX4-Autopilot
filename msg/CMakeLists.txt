@@ -33,6 +33,8 @@
 
 set(msg_files
 	acrobatic_cmd.msg
+	acrobatic_debug.msg
+	acrobatic_demo.msg
 	acrobaticL1_cmd.msg
 	actuator_armed.msg
 	actuator_controls.msg

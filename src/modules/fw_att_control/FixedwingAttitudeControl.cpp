@@ -849,7 +849,7 @@ void FixedwingAttitudeControl::Run()
                         const float _vel_z_real = vel(2);
 
                         control_input.do_acrobatic = true; //true
-                        control_input.acc_y_setpoint = 0;//_acrobaticL1_cmd.acc_y_setpoint;
+                        control_input.acc_y_setpoint = _acrobaticL1_cmd.acc_y_setpoint;
                         control_input._acc_z_real = (float)_sensor_com.accelerometer_m_s2[2];
                         control_input.acc_z_setpoint = _acrobatic_cmd.accel_z_cmd;//float(-9.8 + 2*sin(hrt_absolute_time()/1e6));//_acrobaticL1_cmd.acc_z_setpoint;
 
@@ -861,7 +861,7 @@ void FixedwingAttitudeControl::Run()
                         //control_input.pitch_rate_setpoint = _pitch_ctrl.get_desired_rate();
                         //control_input.yaw_rate_setpoint = _yaw_ctrl.get_desired_rate();
                         control_input.body_p_setpoint = _acrobatic_cmd.body_rates_cmd[0];
-                        //control_input.body_q_setpoint = _acrobatic_cmd.body_rates_cmd[1];
+                        control_input.body_q_setpoint = _acrobatic_cmd.body_rates_cmd[1];
                         control_input.body_r_setpoint = _acrobatic_cmd.body_rates_cmd[2];
                         mavlink_log_info(&_mavlink_log_pub, "acc_z_error:%lf",(double)(control_input.acc_z_setpoint-control_input._acc_z_real));
                     }

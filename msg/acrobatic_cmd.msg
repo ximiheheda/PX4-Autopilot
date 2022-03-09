@@ -11,3 +11,5 @@ float32    accel_z_cmd			# acceleration a direction
 float32    airsp_sp			# airspeed setpoint
 float32    v_sp				# velocity v setpoint
 float32    w_sp				# velocity w setpoint
+float32    v_real			# velocity v real value
+float32    w_real			# velocity w real_value

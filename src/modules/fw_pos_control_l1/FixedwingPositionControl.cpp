@@ -1943,10 +1943,10 @@ FixedwingPositionControl::tecs_update_pitch_throttle(float alt_sp, float airspee
     if(_vehicle_cmd.command == vehicle_command_s::VEHICLE_CMD_DO_ACROBATIC && _acrobatic_cmd.acrobatic_finish != true)
     {
        pitch_for_tecs = _acrobatic_cmd.euler_cmd[0];
-       alt_sp = _acrobatic_cmd.alt_sp_acrobatic;
+       alt_sp =  -1 * _acrobatic_cmd.alt_sp_acrobatic; // alt_sp_acrobatic is negative
        airspeed_sp = _acrobatic_cmd.airsp_sp;
 
-       airspeed_sp = 50; // added by caosu
+       //airspeed_sp = 50; // added by caosu
 
        airspeed_sp *=  (float)1;//1.20;
     }
@@ -1954,7 +1954,7 @@ FixedwingPositionControl::tecs_update_pitch_throttle(float alt_sp, float airspee
     // added by caosu
 
 
-	_tecs.update_pitch_throttle(_R_nb, pitch_for_tecs,
+    _tecs.update_pitch_throttle(_R_nb, pitch_for_tecs,
 				    _global_pos.alt, alt_sp,
 				    airspeed_sp, _airspeed, _eas2tas,
 				    climbout_mode, climbout_pitch_min_rad,
