@@ -32,6 +32,7 @@
 ############################################################################
 
 set(msg_files
+	acrobatic_setpoint.msg	
 	acrobatic_cmd.msg
 	acrobatic_debug.msg
 	acrobatic_demo.msg

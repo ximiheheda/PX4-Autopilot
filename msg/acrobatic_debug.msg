@@ -8,6 +8,4 @@ float32[4] dq_d_real			# the real part of the reference dual quaternion
 float32[4] dq_d_dual			# the dual part of the reference dual quaternion
 float32[4] dq_v_real			# the real part of the real dual quaternion
 float32[4] dq_v_dual			# the dual part of the real dual quaternion
-float32[3] xyz_setpoint_init		# the position setpoint in the inertial frame(initial)
-float32[4] quaternion_setpoint_init	# the quaternion setpoint in the body frame (initial)
 uint64 timestamp_init			# time since system start init(microseconds)

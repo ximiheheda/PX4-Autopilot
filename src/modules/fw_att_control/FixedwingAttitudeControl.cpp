@@ -799,7 +799,6 @@ void FixedwingAttitudeControl::Run()
                     /**< The ordinary rate controllers */
                     /* Update input data for rate controllers */
                     // added by caosu
-                    acrobatic_cmd_poll();
                     //acrobaticL1_cmd_poll();
                     /***********************Calculate the rate difference*************************/
 
@@ -835,8 +834,10 @@ void FixedwingAttitudeControl::Run()
                         control_input.roll_acc_filter = rate_filtered;
                     }*/ //comment here to enable the acrobatic_L1 mission, caosu, 20211209
                     _sensor_com_sub.update(&_sensor_com);
+                    acrobatic_cmd_poll();
 
-                    if(_vehicle_cmd.command == vehicle_command_s::VEHICLE_CMD_DO_ACROBATIC && _acrobatic_cmd.acrobatic_finish != true)
+                    if(_vehicle_cmd.command == vehicle_command_s::VEHICLE_CMD_DO_ACROBATIC && _acrobatic_cmd.acrobatic_finish != true
+                            && _acrobatic_cmd.do_acrobatic == true)
                     {
                         matrix::Vector3f ground_speed(_global_pos.vel_n, _global_pos.vel_e,  _global_pos.vel_d);
                         //calculate the velocity in body frame

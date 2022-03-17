@@ -450,52 +450,6 @@ AcrobaticDQ::Run()
                 _ref_twist = interp_1_d_pqr_uvw();
                 _com_twist = Twist_Command_Gen(_dq_d, _dq_val, _ref_twist);
 
-                // Publish the debug --- message
-                acrobatic_debug_s _acro_debug;
-                _acro_debug.timestamp = hrt_absolute_time();
-                _acro_debug.timestamp_init = _time_first_acrobatic;
-                _acro_debug.do_acrobatic = true;
-                _acro_debug.xyz_setpoint[0] = _xyz_d[0];
-                _acro_debug.xyz_setpoint[1] = _xyz_d[1];
-                _acro_debug.xyz_setpoint[2] = _xyz_d[2];
-                _acro_debug.xyz_val[0] = _xyz_val[0];
-                _acro_debug.xyz_val[1] = _xyz_val[1];
-                _acro_debug.xyz_val[2] = _xyz_val[2];
-                _acro_debug.quaternion_setpoint[0] = _quat_d(0);
-                _acro_debug.quaternion_setpoint[1] = _quat_d(1);
-                _acro_debug.quaternion_setpoint[2] = _quat_d(2);
-                _acro_debug.quaternion_setpoint[3] = _quat_d(3);
-                _acro_debug.quaternion_val[0] = _quat_val(0);
-                _acro_debug.quaternion_val[1] = _quat_val(1);
-                _acro_debug.quaternion_val[2] = _quat_val(2);
-                _acro_debug.quaternion_val[3] = _quat_val(3);
-
-                _acro_debug.dq_d_real[0] = _dq_d.m_real(0);
-                _acro_debug.dq_d_real[1] = _dq_d.m_real(1);
-                _acro_debug.dq_d_real[2] = _dq_d.m_real(2);
-                _acro_debug.dq_d_real[3] = _dq_d.m_real(3);
-                _acro_debug.dq_d_dual[0] = _dq_d.m_dual(0);
-                _acro_debug.dq_d_dual[1] = _dq_d.m_dual(1);
-                _acro_debug.dq_d_dual[2] = _dq_d.m_dual(2);
-                _acro_debug.dq_d_dual[3] = _dq_d.m_dual(3);
-
-                _acro_debug.dq_v_real[0] = _dq_val.m_real(0);
-                _acro_debug.dq_v_real[1] = _dq_val.m_real(1);
-                _acro_debug.dq_v_real[2] = _dq_val.m_real(2);
-                _acro_debug.dq_v_real[3] = _dq_val.m_real(3);
-                _acro_debug.dq_v_dual[0] = _dq_val.m_dual(0);
-                _acro_debug.dq_v_dual[1] = _dq_val.m_dual(1);
-                _acro_debug.dq_v_dual[2] = _dq_val.m_dual(2);
-                _acro_debug.dq_v_dual[3] = _dq_val.m_dual(3);
-
-                _acro_debug.xyz_setpoint_init[0] = float(_xyz_time_l[0].xyz_v[0]);
-                _acro_debug.xyz_setpoint_init[1] = float(_xyz_time_l[0].xyz_v[1]);
-                _acro_debug.xyz_setpoint_init[2] = float(_xyz_time_l[0].xyz_v[2]);
-                _acro_debug.quaternion_setpoint_init[0] = _quat_time_l[0].quat_v(0);
-                _acro_debug.quaternion_setpoint_init[1] = _quat_time_l[0].quat_v(1);
-                _acro_debug.quaternion_setpoint_init[2] = _quat_time_l[0].quat_v(2);
-                _acro_debug.quaternion_setpoint_init[3] = _quat_time_l[0].quat_v(3);
-
                 /*for(size_t i=0; i<8; i++)
                 {
                     _acro_debug.dq_error[i] = _pos_err_val_tmp[i];
@@ -504,8 +458,6 @@ AcrobaticDQ::Run()
                 {
                     _acro_debug.hat_g_inv[i] = _Hat_G_inv_tmp[i];
                 }*/
-
-                _acro_debug_pub.publish(_acro_debug);
 
                 //mavlink_log_info(&_mavlink_log_pub, "Twist Command(PQR): %.2lf\t%.2lf\t%.2lf\t%.2lf",
                 //                (double)_com_twist(0,0),(double)_com_twist(1,0),

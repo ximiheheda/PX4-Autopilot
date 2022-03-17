@@ -82,6 +82,15 @@ public:
 	T &operator[](size_t n) { return _items[n]; }
 	const T &operator[](size_t n) const { return _items[n]; }
 
+    void operator=(float *a)
+    {
+        Array &self = *this;
+        self[0] = a[0];
+        self[1] = a[1];
+        self[2] = a[2];
+        self[3] = a[3];
+    }
+
 	T &at(size_t n) { return _items[n]; }
 	const T &at(size_t n) const { return _items[n]; }
 

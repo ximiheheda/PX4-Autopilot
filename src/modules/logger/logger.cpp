@@ -519,6 +519,7 @@ void Logger::add_default_topics()
     //add_topic("dmp_test", 10); //added by caosu
     //add_topic("hil_sensor_debug_ekf", 100); //added by caosu
     //add_topic("hil_sensor_debug_gyro", 100); //added by caosu
+    add_topic("acrobatic_setpoint", 10); //added by caosu
 	add_topic("actuator_controls_0", 100);
 	add_topic("actuator_controls_1", 100);
 	add_topic("airspeed", 200);
