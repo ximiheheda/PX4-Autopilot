@@ -13,7 +13,10 @@ float32    airsp_sp			# airspeed setpoint
 float32    v_sp				# velocity v setpoint
 float32    w_sp				# velocity w setpoint
 float32    v_real			# velocity v real value
-float32    w_real			# velocity w real_value
+float32    w_real			# velocity w real value
 float32    u_sp_cal			# velocity u setpoint calculated
 float32    w_sp_cal			# velocity w setpoint calculated
 float32    v_sp_cal			# velocity v setpoint calculated
+float32    vel_total			# total velocity
+float32    u_real			# velocity u real value
+float32[3] xyz_first_acro		# xyz first acro
