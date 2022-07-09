@@ -28,27 +28,6 @@ AcrobaticPoseControl::AcrobaticPoseControl():
     //PX4_INFO("AcrobaticCommand::AcrobaticCommand");
     /**< fetch initial parameter values*/
     /*     parameters    */
-    //Related to velocity w
-     _parameter_handles.fw_dq_w_i = param_find("FW_DQ_W_I");
-     _parameter_handles.fw_dq_w_ff = param_find("FW_DQ_W_FF");
-     _parameter_handles.fw_dq_w_p = param_find("FW_DQ_W_P");
-    //Related to velocity v
-     _parameter_handles.fw_dq_v_i = param_find("FW_DQ_V_I");
-     _parameter_handles.fw_dq_v_ff = param_find("FW_DQ_V_FF");
-     _parameter_handles.fw_dq_v_p = param_find("FW_DQ_V_P");
-    //Related to angular rates p
-     _parameter_handles.fw_dq_p_i = param_find("FW_DQ_P_I");
-     _parameter_handles.fw_dq_p_ff = param_find("FW_DQ_P_FF");
-     _parameter_handles.fw_dq_p_p = param_find("FW_DQ_P_P");
-
-
-    //Offset in virtual frame
-     _parameter_handles.fw_dq_delta_x = param_find("FW_DQ_DELTA_X");
-    //Angular rates TC
-     _parameter_handles.fw_acro_q0_tc = param_find("FW_DQ_Q0_TC");
-     _parameter_handles.fw_acro_q1_tc = param_find("FW_DQ_Q1_TC");
-     _parameter_handles.fw_acro_q2_tc = param_find("FW_DQ_Q2_TC");
-     _parameter_handles.fw_acro_q3_tc = param_find("FW_DQ_Q3_TC");
 
 
     _acrobatic_cmd.acrobatic_finish = false;
@@ -76,24 +55,6 @@ int
 AcrobaticPoseControl::parameters_update()
 {
     //PX4_INFO("AcrobaticCommand::parameter_update");
-    param_get(_parameter_handles.fw_dq_w_i, &(_parameters.fw_dq_w_i));
-    param_get(_parameter_handles.fw_dq_w_ff, &(_parameters.fw_dq_w_ff));
-    param_get(_parameter_handles.fw_dq_w_p, &(_parameters.fw_dq_w_p));
-
-    param_get(_parameter_handles.fw_dq_v_i, &(_parameters.fw_dq_v_i));
-    param_get(_parameter_handles.fw_dq_v_ff, &(_parameters.fw_dq_v_ff));
-    param_get(_parameter_handles.fw_dq_v_p, &(_parameters.fw_dq_v_p));
-
-    param_get(_parameter_handles.fw_dq_p_i, &(_parameters.fw_dq_p_i));
-    param_get(_parameter_handles.fw_dq_p_ff, &(_parameters.fw_dq_p_ff));
-    param_get(_parameter_handles.fw_dq_p_p, &(_parameters.fw_dq_p_p));
-
-    param_get(_parameter_handles.fw_dq_delta_x, &(_parameters.fw_dq_delta_x));
-
-    param_get(_parameter_handles.fw_acro_q0_tc, &(_parameters.fw_acro_q0_tc));
-    param_get(_parameter_handles.fw_acro_q1_tc, &(_parameters.fw_acro_q1_tc));
-    param_get(_parameter_handles.fw_acro_q2_tc, &(_parameters.fw_acro_q2_tc));
-    param_get(_parameter_handles.fw_acro_q3_tc, &(_parameters.fw_acro_q3_tc));
     return PX4_OK;
 }
 
@@ -322,7 +283,7 @@ AcrobaticPoseControl::Run()
                 _twist_real.m_dual(3) = _w_real;
                 DualQuaternion<float> _hat_q_delta;
                 float _delta = 1;
-                _hat_q_delta.m_real(0) = 1;
+                _hat_q_delta.m_real(0) = 3;
                 _hat_q_delta.m_dual(1) = -1*_delta;
                 _twist_virtual = _hat_q_delta.conjugate()*_twist_real;
                 _twist_virtual = _twist_virtual*_hat_q_delta;
@@ -334,7 +295,8 @@ AcrobaticPoseControl::Run()
                 _twist_ref.m_real(2) = _com_twist(2,0);
                 _twist_ref.m_real(3) = _com_twist(3,0);
                 _twist_ref.m_dual(0) = _com_twist(4,0);
-                _twist_ref.m_dual(1) = _com_twist(5,0);
+                //_twist_ref.m_dual(1) = _com_twist(5,0);
+                _twist_ref.m_dual(1) = 60; //Force the velocity to 60
                 _twist_ref.m_dual(2) = _com_twist(6,0);
                 _twist_ref.m_dual(3) = _com_twist(7,0);
                 _twist_ref_virtual = _hat_q_delta.conjugate()*_twist_ref;
