@@ -314,12 +314,24 @@ AcrobaticCommander::Run()
                 /**< loop maneuver */
                 case 0:
                     //filepath_pqr_uvw = "/fs/microsd/data/level_pqr_uvw.txt";
-                    filepath_pqr_uvw = "/fs/microsd/data/immelman_pqr_uvw.txt";
+                    filepath_pqr_uvw = "/fs/microsd/data/loop_pqr_uvw.txt";
                     //filepath_pqr_uvw = "/fs/microsd/data/fast_climb_pqr_uvw.txt";
                     break;
                 /**< Immelman maneuver */
                 case 1:
-                    filepath_pqr_uvw = "/fs/microsd/data/level_pqr_uvw.txt";
+                    filepath_pqr_uvw = "/fs/microsd/data/immelman_pqr_uvw.txt";
+                    //filepath_pqr_uvw = "/fs/microsd/data/fast_climb_pqr_uvw.txt";
+                    break;
+                case 2:
+                    filepath_pqr_uvw = "/fs/microsd/data/motion_pqr_uvw.txt";
+                    //filepath_pqr_uvw = "/fs/microsd/data/fast_climb_pqr_uvw.txt";
+                    break;
+                case 3:
+                    filepath_pqr_uvw = "/fs/microsd/data/barrel_pqr_uvw.txt";
+                    //filepath_pqr_uvw = "/fs/microsd/data/fast_climb_pqr_uvw.txt";
+                    break;
+                case 4:
+                    filepath_pqr_uvw = "/fs/microsd/data/yoyo_pqr_uvw.txt";
                     //filepath_pqr_uvw = "/fs/microsd/data/fast_climb_pqr_uvw.txt";
                     break;
                 /**< default read nothing, keep straight flight*/
@@ -435,12 +447,27 @@ void AcrobaticCommander::Twist_Demon_Storage()
     //calculate the velocity in body frame
     // Velocity in body frame
     const matrix::Dcmf R_to_body(Quatf(_att.q).inversed());
-    const matrix::Vector3f vel = R_to_body * matrix::Vector3f(ground_speed(0), ground_speed(1), ground_speed(2));
+    //const matrix::Vector3f vel = R_to_body * matrix::Vector3f(ground_speed(0), ground_speed(1), ground_speed(2));
+
+    Quaternion<float> quat_body;
+    quat_body(0) = _att.q[0];
+    quat_body(1) = _att.q[1];
+    quat_body(2) = _att.q[2];
+    quat_body(3) = _att.q[3];
+    //Quaternion<float> ground_speed_quat;
+    //ground_speed_quat(0) = 0;
+    //ground_speed_quat(1) = ground_speed(0);
+    //ground_speed_quat(2) = ground_speed(1);
+    //ground_speed_quat(3) = ground_speed(2);
+    matrix::Vector3f uvx;
+    Quaternion<float> quat_body_inverse;
+    quat_body_inverse = quat_body.inversed();
+    uvx = quat_body_inverse.conjugate(ground_speed);
 
     // the linear velocities in the body frame
-    float _u_real_storage = vel(0);
-    float _v_real_storage = vel(1);
-    float _w_real_storage = vel(2);
+    float _u_real_storage = uvx(0);
+    float _v_real_storage = uvx(1);
+    float _w_real_storage = uvx(2);
 
     // the angular velocities in the body frame
     //vehicle_angular_velocity_s angular_velocity{};

@@ -775,15 +775,16 @@ PARAM_DEFINE_FLOAT(FW_DTRIM_P_FLPS, 0.0f);
 
 /**
 * Fixed-wing quaternion time constant 
+* PARAM_DEFINE_FLOAT(FW_DQ_Q0_TC, 0.5f);
+
+* PARAM_DEFINE_FLOAT(FW_DQ_Q1_TC, 0.5f);
+
+* PARAM_DEFINE_FLOAT(FW_DQ_Q2_TC, 0.5f);
+
+* PARAM_DEFINE_FLOAT(FW_DQ_Q3_TC, 0.5f);
 */
 
-PARAM_DEFINE_FLOAT(FW_DQ_Q0_TC, 0.5f);
 
-PARAM_DEFINE_FLOAT(FW_DQ_Q1_TC, 0.5f);
-
-PARAM_DEFINE_FLOAT(FW_DQ_Q2_TC, 0.5f);
-
-PARAM_DEFINE_FLOAT(FW_DQ_Q3_TC, 0.5f);
 
 /**
 * Fixed-wing w velocity control parameters

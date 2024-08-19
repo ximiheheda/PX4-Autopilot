@@ -1940,21 +1940,24 @@ FixedwingPositionControl::tecs_update_pitch_throttle(float alt_sp, float airspee
     //    _vehicle_cmd_sub.copy(&_vehicle_cmd);
     //}
     _vehicle_cmd_sub.update(&_vehicle_cmd);
+    bool acro_true = false;
 
     if(_vehicle_cmd.command == vehicle_command_s::VEHICLE_CMD_DO_ACROBATIC && _acrobatic_cmd.acrobatic_finish != true)
     {
        if(_acrobatic_cmd.do_acrobatic == true) // the desired altitude is calculated
        {
            pitch_for_tecs = _acrobatic_cmd.euler_cmd[0];
+           // The value of the alt_sp is successfully tranferred to TECS
            alt_sp =  1 * _acrobatic_cmd.alt_sp_acrobatic; // alt_sp_acrobatic is negative
            //airspeed_sp = 60;// _acrobatic_cmd.airsp_sp;
            airspeed_sp = _acrobatic_cmd.airsp_sp;
+           acro_true = true;
        }
        else // the desired atitude has not been calculated
        {
-           pitch_for_tecs = 0;//_acrobatic_cmd.euler_cmd[0];
-           alt_sp =  190; // alt_sp_acrobatic is negative
-           airspeed_sp = 50;// _acrobatic_cmd.airsp_sp;
+           pitch_for_tecs = _acrobatic_cmd.euler_cmd[0];//_acrobatic_cmd.euler_cmd[0];
+           alt_sp =  _global_pos.alt; // alt_sp_acrobatic is negative
+           airspeed_sp = 60;// _acrobatic_cmd.airsp_sp;
        }
 
 
@@ -1971,7 +1974,7 @@ FixedwingPositionControl::tecs_update_pitch_throttle(float alt_sp, float airspee
 				    airspeed_sp, _airspeed, _eas2tas,
 				    climbout_mode, climbout_pitch_min_rad,
 				    throttle_min, throttle_max, throttle_cruise,
-				    pitch_min_rad, pitch_max_rad);
+                    pitch_min_rad, pitch_max_rad, acro_true);
 
 	tecs_status_publish();
 }

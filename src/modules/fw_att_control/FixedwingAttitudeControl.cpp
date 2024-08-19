@@ -269,15 +269,6 @@ FixedwingAttitudeControl::parameters_update()
     param_get(_parameter_handles.fw_dq_p_ff, &(_parameters.fw_dq_p_ff));
     param_get(_parameter_handles.fw_dq_p_p, &(_parameters.fw_dq_p_p));
 
-    param_get(_parameter_handles.fw_dq_delta_x, &(_parameters.fw_dq_delta_x));
-
-    param_get(_parameter_handles.fw_acro_q0_tc, &(_parameters.fw_acro_q0_tc));
-    param_get(_parameter_handles.fw_acro_q1_tc, &(_parameters.fw_acro_q1_tc));
-    param_get(_parameter_handles.fw_acro_q2_tc, &(_parameters.fw_acro_q2_tc));
-    param_get(_parameter_handles.fw_acro_q3_tc, &(_parameters.fw_acro_q3_tc));
-
-
-
     /* pitch control parameters */
     _pitch_ctrl.set_time_constant(_parameters.p_tc);
     _pitch_ctrl.set_k_p(_parameters.p_p);
@@ -900,14 +891,15 @@ void FixedwingAttitudeControl::Run()
 
                         //const float _vel_x_real = vel(0);
                         const float _vel_y_real = vel(1);
-                        const float _vel_z_real = vel(2);
+                        //const float _vel_z_real = vel(2);
 
                         control_input.do_acrobatic = true; //true
                         control_input.acc_y_setpoint = _acrobaticL1_cmd.acc_y_setpoint;
                         control_input._acc_z_real = (float)_sensor_com.accelerometer_m_s2[2];
                         control_input.acc_z_setpoint = _acrobatic_cmd.accel_z_cmd;//float(-9.8 + 2*sin(hrt_absolute_time()/1e6));//_acrobaticL1_cmd.acc_z_setpoint;
 
-                        control_input._vel_z_real = (float)_vel_z_real;
+                        //control_input._vel_z_real = (float)_vel_z_real; //eddited by caosu 20220927
+                        control_input._vel_z_real =  _acrobatic_cmd.w_real; //added by caosu 20220927
                         control_input._vel_y_real = (float)_vel_y_real;
                         control_input.vel_z_setpoint = _acrobatic_cmd.w_sp;
                         control_input.vel_y_setpoint = _acrobatic_cmd.v_sp;

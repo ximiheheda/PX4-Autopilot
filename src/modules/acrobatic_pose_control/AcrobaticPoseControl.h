@@ -159,16 +159,8 @@ private:
     float _vel_total{0};     /**< velocity total*/
 
     struct{
-        float fw_dq_w_i;
-        float fw_dq_w_ff;
-        float fw_dq_w_p;
-        float fw_dq_v_i;
-        float fw_dq_v_ff;
-        float fw_dq_v_p;
-        float fw_dq_p_i;
-        float fw_dq_p_ff;
-        float fw_dq_p_p;
         float fw_dq_delta_x;
+        float fw_dq_u_command;
         float fw_acro_q0_tc;
         float fw_acro_q1_tc;
         float fw_acro_q2_tc;
@@ -176,21 +168,19 @@ private:
     }_parameters{};			/**< local copies of interesting parameters */
 
     struct {
-        param_t fw_dq_w_i;
-        param_t fw_dq_w_ff;
-        param_t fw_dq_w_p;
-        param_t fw_dq_v_i;
-        param_t fw_dq_v_ff;
-        param_t fw_dq_v_p;
-        param_t fw_dq_p_i;
-        param_t fw_dq_p_ff;
-        param_t fw_dq_p_p;
         param_t fw_dq_delta_x;
+        param_t fw_dq_u_command;
         param_t fw_acro_q0_tc;
         param_t fw_acro_q1_tc;
         param_t fw_acro_q2_tc;
         param_t fw_acro_q3_tc;
     } _parameter_handles{};		/**< handles for interesting parameters */
+    float _fw_dq_delta_x{0};
+    float _fw_dq_u_command{0};
+    float _fw_acro_q0_tc{0};
+    float _fw_acro_q1_tc{0};
+    float _fw_acro_q2_tc{0};
+    float _fw_acro_q3_tc{0};
 
     /**<------------------------------ Functions -----------------------------------------*/
     /**

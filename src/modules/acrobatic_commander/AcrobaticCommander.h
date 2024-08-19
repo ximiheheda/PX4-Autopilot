@@ -48,6 +48,7 @@
 #include <matrix/Matrix.hpp>
 #include <matrix/math.hpp>
 #include <matrix/DualQuaternion.h>
+#include <matrix/Vector3.hpp>
 
 //hrt_abstime _last_run{0};
 //float _rate_prev_filtered;

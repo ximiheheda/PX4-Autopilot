@@ -28,7 +28,12 @@ AcrobaticPoseControl::AcrobaticPoseControl():
     //PX4_INFO("AcrobaticCommand::AcrobaticCommand");
     /**< fetch initial parameter values*/
     /*     parameters    */
-
+    _parameter_handles.fw_acro_q0_tc = param_find("FW_ACRO_Q0_TC");
+    _parameter_handles.fw_acro_q1_tc = param_find("FW_ACRO_Q1_TC");
+    _parameter_handles.fw_acro_q2_tc = param_find("FW_ACRO_Q2_TC");
+    _parameter_handles.fw_acro_q3_tc = param_find("FW_ACRO_Q3_TC");
+    _parameter_handles.fw_dq_delta_x = param_find("FW_DQ_DELTA_X");
+    _parameter_handles.fw_dq_u_command = param_find("FW_DQ_U_COMMAND");
 
     _acrobatic_cmd.acrobatic_finish = false;
     parameters_update();
@@ -55,6 +60,21 @@ int
 AcrobaticPoseControl::parameters_update()
 {
     //PX4_INFO("AcrobaticCommand::parameter_update");
+    param_get(_parameter_handles.fw_dq_delta_x, &(_parameters.fw_dq_delta_x));
+
+    param_get(_parameter_handles.fw_dq_u_command, &(_parameters.fw_dq_u_command));
+    param_get(_parameter_handles.fw_acro_q0_tc, &(_parameters.fw_acro_q0_tc));
+    param_get(_parameter_handles.fw_acro_q1_tc, &(_parameters.fw_acro_q1_tc));
+    param_get(_parameter_handles.fw_acro_q2_tc, &(_parameters.fw_acro_q2_tc));
+    param_get(_parameter_handles.fw_acro_q3_tc, &(_parameters.fw_acro_q3_tc));
+
+    _fw_dq_delta_x = _parameters.fw_dq_delta_x;
+    _fw_dq_u_command = _parameters.fw_dq_u_command;
+    _fw_acro_q0_tc = _parameters.fw_acro_q0_tc;
+    _fw_acro_q1_tc = _parameters.fw_acro_q1_tc;
+    _fw_acro_q2_tc = _parameters.fw_acro_q2_tc;
+    _fw_acro_q3_tc = _parameters.fw_acro_q3_tc;
+
     return PX4_OK;
 }
 
@@ -244,14 +264,6 @@ AcrobaticPoseControl::Run()
                 //float w = _local_pos.vz;
                 //_alt_sp_acrobatic += -1 * (float)((now-time_prev)/1e6) * w; //transfer according to the frame
 
-
-
-
-
-
-
-
-
                 // Calculate the true
                 // flight velocity v_sp and w_sp
                 matrix::Vector3f ground_speed(_global_pos.vel_n, _global_pos.vel_e,  _global_pos.vel_d);
@@ -282,25 +294,22 @@ AcrobaticPoseControl::Run()
                 _twist_real.m_dual(2) = _v_real;
                 _twist_real.m_dual(3) = _w_real;
                 DualQuaternion<float> _hat_q_delta;
-                float _delta = 1;
-                _hat_q_delta.m_real(0) = 3;
+                float _delta = _fw_dq_delta_x;
+                _hat_q_delta.m_real(0) = 1;
                 _hat_q_delta.m_dual(1) = -1*_delta;
                 _twist_virtual = _hat_q_delta.conjugate()*_twist_real;
                 _twist_virtual = _twist_virtual*_hat_q_delta;
                 //Transfer the reference twist to virtual frame
-                DualQuaternion<float> _twist_ref;
-                DualQuaternion<float> _twist_ref_virtual;
-                _twist_ref.m_real(0) = _com_twist(0,0);
-                _twist_ref.m_real(1) = _com_twist(1,0);
-                _twist_ref.m_real(2) = _com_twist(2,0);
-                _twist_ref.m_real(3) = _com_twist(3,0);
-                _twist_ref.m_dual(0) = _com_twist(4,0);
+                //DualQuaternion<float> _twist_ref;
+                //_twist_ref.m_real(0) = _com_twist(0,0);
+                //_twist_ref.m_real(1) = _com_twist(1,0);
+                //_twist_ref.m_real(2) = _com_twist(2,0);
+                //_twist_ref.m_real(3) = _com_twist(3,0);
+                //_twist_ref.m_dual(0) = _com_twist(4,0);
                 //_twist_ref.m_dual(1) = _com_twist(5,0);
-                _twist_ref.m_dual(1) = 60; //Force the velocity to 60
-                _twist_ref.m_dual(2) = _com_twist(6,0);
-                _twist_ref.m_dual(3) = _com_twist(7,0);
-                _twist_ref_virtual = _hat_q_delta.conjugate()*_twist_ref;
-                _twist_ref_virtual = _twist_ref_virtual*_hat_q_delta;
+                //_twist_ref.m_dual(1) = 60; //Force the velocity to 60
+                //_twist_ref.m_dual(2) = _com_twist(6,0);
+                //_twist_ref.m_dual(3) = _com_twist(7,0);
 
                 /*----------------------------Send Command TECS-----------------------------------------*/
                 _alt_sp_acrobatic = _alt_first_acrobatic - _xyz_d[2];
@@ -311,9 +320,9 @@ AcrobaticPoseControl::Run()
                 _acrobatic_cmd.do_acrobatic = true;
                 _acrobatic_cmd.alt_sp_acrobatic = _alt_sp_acrobatic;//_xyz_d[2];
 
-                _acrobatic_cmd.airsp_sp = _twist_ref_virtual.m_dual(1); //20220708
-                _acrobatic_cmd.v_sp = _twist_ref_virtual.m_dual(2); //20220708
-                _acrobatic_cmd.w_sp = _twist_ref_virtual.m_dual(3); //20220708
+                _acrobatic_cmd.airsp_sp = _com_twist(5,0); //20220708
+                _acrobatic_cmd.v_sp = _com_twist(6,0); //20220708
+                _acrobatic_cmd.w_sp = _com_twist(7,0); //20220708
 
 
                 //_acrobatic_cmd.airsp_sp = 60;//_com_twist(5,0); 20220708
@@ -396,7 +405,7 @@ void AcrobaticPoseControl::Twist_Demon_Storage()
 
 matrix::Matrix<float, 8, 1> AcrobaticPoseControl::Twist_Command_Gen(const DualQuaternion<float> _dual_quat_cmd,
                                                            const DualQuaternion<float> _dual_quat_val,
-                                                           const matrix::Matrix<float, 8, 1> _ref_twist){ //verified
+                                                           const matrix::Matrix<float, 8, 1> _ref_twist_input){ //verified
      DualQuaternion<float> _hat_q_e;
      _hat_q_e = _dual_quat_cmd.conjugate() * _dual_quat_val;
      DualQuaternion<float> _pose_err;
@@ -406,6 +415,8 @@ matrix::Matrix<float, 8, 1> AcrobaticPoseControl::Twist_Command_Gen(const DualQu
      matrix::Matrix<float, 8, 8> _inv_Hat_G_e;
      _inv_Hat_G_e = inv_Hat_G_mat_cal(_Hat_G_e);
      matrix::Matrix<float, 8, 1> _pose_err_val;
+     //q_e = _pose_err.m_real
+     //p_e = 2*quatmultiply(quatconj(q_e),_pose_err_val.m_dual)
      for(size_t i=0; i<4; i++){
         _pose_err_val(i,0) = _pose_err.m_real(i);
         _pose_err_val(i+4,0) = _pose_err.m_dual(i);
@@ -416,16 +427,16 @@ matrix::Matrix<float, 8, 1> AcrobaticPoseControl::Twist_Command_Gen(const DualQu
      {
          _pos_err_val_tmp[i] = _pose_err_val(i,0);
      }
-     _mat_gain(1,1) = -0.1;
-     _mat_gain(2,2) = -0.1;
-     _mat_gain(3,3) = -0.1;
+     _mat_gain(1,1) = -1;
+     _mat_gain(2,2) = -1;
+     _mat_gain(3,3) = -1;
      _mat_gain(5,5) = -0.1;
      _mat_gain(6,6) = -0.1;
      _mat_gain(7,7) = -0.1;
      for(size_t i=0; i<8; i++)
      {
          _pose_err_val(i,0) *= _mat_gain(i,i);
-         _pose_err_val(i,0) *= -1;
+         _pose_err_val(i,0) *= -float(3.6);
      }
      for(size_t i=0; i<8; i++)
      {
@@ -435,11 +446,42 @@ matrix::Matrix<float, 8, 1> AcrobaticPoseControl::Twist_Command_Gen(const DualQu
          }
      }
      //_omega_e = float(1) * _inv_Hat_G_e * (_mat_gain*_pose_err_val);
-     _omega_e = _inv_Hat_G_e * _pose_err_val;
+     //_omega_e = _inv_Hat_G_e * _pose_err_val;
+     _omega_e = _pose_err_val;
 
      matrix::Matrix<float, 8, 1> _com_twist;
+
+     DualQuaternion<float> _twist_ref_virtual;
      //_com_twist = _ref_twist;//_omega_e + _ref_twist; //eddited by caosu
-     _com_twist = _ref_twist;
+     DualQuaternion<float> _hat_q_delta;
+     //Transfer the reference twist to virtual frame
+     DualQuaternion<float> _twist_ref;
+     _twist_ref.m_real(0) = _ref_twist_input(0,0);
+     _twist_ref.m_real(1) = _ref_twist_input(1,0);
+     _twist_ref.m_real(2) = _ref_twist_input(2,0);
+     _twist_ref.m_real(3) = _ref_twist_input(3,0);
+     _twist_ref.m_dual(0) = _ref_twist_input(4,0);
+     //_twist_ref.m_dual(1) = _com_twist(5,0);
+     //_twist_ref.m_dual(1) = 60; //Force the velocity to 60
+     _twist_ref.m_dual(1) = _ref_twist_input(5,0);//_fw_dq_u_command;
+     _twist_ref.m_dual(2) = _ref_twist_input(6,0);
+     _twist_ref.m_dual(3) = _ref_twist_input(7,0);
+     float _delta = _fw_dq_delta_x;
+     _hat_q_delta.m_real(0) = 1;
+     _hat_q_delta.m_dual(1) = -1*_delta;
+     _twist_ref_virtual = _hat_q_delta.conjugate()*_twist_ref;
+     _twist_ref_virtual = _twist_ref_virtual*_hat_q_delta;
+     _com_twist(0,0) = _twist_ref_virtual.m_real(0);
+     _com_twist(1,0) = _twist_ref_virtual.m_real(1);
+     _com_twist(2,0) = _twist_ref_virtual.m_real(2);
+     _com_twist(3,0) = _twist_ref_virtual.m_real(3);
+     _com_twist(4,0) = _twist_ref_virtual.m_dual(0);
+     _com_twist(5,0) = _twist_ref_virtual.m_dual(1);
+     _com_twist(6,0) = _twist_ref_virtual.m_dual(2);
+     _com_twist(7,0) = _twist_ref_virtual.m_dual(3);
+
+     _com_twist = _com_twist + _omega_e;
+     _com_twist(5,0) = float(60.0);
      //_com_twist = _omega_e + _ref_twist;
 
      _u_cal_tmp = _omega_e(5,0); //obtain the u value
@@ -451,7 +493,7 @@ matrix::Matrix<float, 8, 1> AcrobaticPoseControl::Twist_Command_Gen(const DualQu
 matrix::Matrix<float, 3, 1> AcrobaticPoseControl::Angular_rates_control(Quaternion<float> _quat_d,
                                                                         Quaternion<float> _att_q_val){
     Quaternion<float> _quat_e;
-    float _fw_acro_q0_tc, _fw_acro_q1_tc, _fw_acro_q2_tc, _fw_acro_q3_tc;
+    //float _fw_acro_q0_tc, _fw_acro_q1_tc, _fw_acro_q2_tc, _fw_acro_q3_tc;
     _fw_acro_q0_tc = 0.5;
     _fw_acro_q1_tc = 0.5;
     _fw_acro_q2_tc = 0.5;
