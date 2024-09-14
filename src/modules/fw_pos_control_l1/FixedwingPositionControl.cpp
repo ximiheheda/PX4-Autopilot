@@ -1957,7 +1957,7 @@ FixedwingPositionControl::tecs_update_pitch_throttle(float alt_sp, float airspee
        {
            pitch_for_tecs = _acrobatic_cmd.euler_cmd[0];//_acrobatic_cmd.euler_cmd[0];
            alt_sp =  _global_pos.alt; // alt_sp_acrobatic is negative
-           airspeed_sp = 60;// _acrobatic_cmd.airsp_sp;
+           //airspeed_sp = 60;// _acrobatic_cmd.airsp_sp;
        }
 
 

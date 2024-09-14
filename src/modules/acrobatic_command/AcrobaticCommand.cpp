@@ -2,6 +2,8 @@
  * Acrobatic Command
  * This module aims to generate the desired attitude command in quaternion and convert it to p,q,r(axis rotational rates)
  *
+ * This is version 2.0, for aggressive high-angle maneuver
+ *
  *
  */
 /**< Variables */
@@ -171,7 +173,7 @@ AcrobaticCommand::acro_data_read() /**< This function needs to run in the init s
         //_time_v.push_back(time);
         //_quat_v.push_back(q_temp);
         //PX4_INFO("-----------------------------------------");
-        //PX4_INFO("time:%ld",time);
+        //PX4_INFO("time:%ld",time);m
         //PX4_INFO("q_temp:%f,%f,%f,%f",(double)q_temp(0),(double)q_temp(1),(double)q_temp(2),(double)q_temp(3));
     }
 
@@ -388,58 +390,7 @@ AcrobaticCommand::mod_iden_data()
 {
 
     /*-------------        Sensor data subscription       ----------------*/
-    // Acceleration
-    /*
-    _mod_iden_data.axyz_body[0] = _sensor_accel.x;
-    _mod_iden_data.axyz_body[1] = _sensor_accel.y;
-    _mod_iden_data.axyz_body[2] = _sensor_accel.z;
-    // Engine Thrust
-    _mod_iden_data.engine_thrust = _sensor_accel.temperature;
-    // Angular velocity
-    _vehicle_rates_sub.copy(&_vehicle_angular_vel);
-//    _mod_iden_data.pqr_body[0] = _vehicle_angular_vel.xyz[0];
-//    _mod_iden_data.pqr_body[1] = _vehicle_angular_vel.xyz[1];
-//    _mod_iden_data.pqr_body[2] = _vehicle_angular_vel.xyz[2];
-    _mod_iden_data.pqr_body[0] = _man_status.angular_rate_filt[0];
-    _mod_iden_data.pqr_body[1] = _man_status.angular_rate_filt[1];
-    _mod_iden_data.pqr_body[2] = _man_status.angular_rate_filt[2];
-    mavlink_log_info(&_mavlink_log_pub, "_mod_iden_data.pqr_body[0]:%lf", (double)_vehicle_angular_vel.xyz[0]);
-    // Control inputs dedadr
-    _mod_iden_data.dadedr_def[0] = _actuator_controls.control[_actuator_controls.INDEX_ROLL];
-    _mod_iden_data.dadedr_def[1] = _actuator_controls.control[_actuator_controls.INDEX_PITCH];
-    _mod_iden_data.dadedr_def[2] = _actuator_controls.control[_actuator_controls.INDEX_YAW];
-    // Body frame veloci
-                    //quat_uvw2xyz();ty
-    // Rotation from inertial frame to body frame
 
-    matrix::Matrix3f dcm;
-    dcm.setZero();
-    dcm(0, 0) = _att_q(0)*_att_q(0) + _att_q(1)*_att_q(1) - _att_q(2)*_att_q(2) - _att_q(3)*_att_q(3);
-    dcm(0, 1) = 2*(_att_q(1)*_att_q(2) + _att_q(0)*_att_q(3));
-    dcm(0, 2) = 2*(_att_q(1)*_att_q(3) - _att_q(0)*_att_q(2));
-
-    dcm(1, 0) = 2*(_att_q(1)*_att_q(2) - _att_q(0)*_att_q(3));
-    dcm(1, 1) = _att_q(0)*_att_q(0) - _att_q(1)*_att_q(1) + _att_q(2)*_att_q(2) - _att_q(3)*_att_q(3);
-    dcm(1, 2) = 2*(_att_q(2)*_att_q(3) + _att_q(0)*_att_q(1));
-
-    dcm(2, 0) = 2*(_att_q(1)*_att_q(3) + _att_q(0)*_att_q(2));
-    dcm(2, 1) = 2*(_att_q(2)*_att_q(3) - _att_q(0)*_att_q(1));
-    dcm(2, 2) = _att_q(0)*_att_q(0) - _att_q(1)*_att_q(1) - _att_q(2)*_att_q(2) + _att_q(3)*_att_q(3);
-
-    matrix::Vector3f vxyz(_local_pos.vx, _local_pos.vy, _local_pos.vz);
-    matrix::Vector3f uvw_body = dcm * vxyz;
-
-    _mod_iden_data.uvw_body[0] = uvw_body(0);
-    _mod_iden_data.uvw_b
-                    //quat_uvw2xyz();ody[1] = uvw_body(1);
-    _mod_iden_data.uvw_body[2] = uvw_body(2);
-    //Angular acceleration filtered
-    */
-
-    /*-------------        Sensor data Publication       ----------------*/
-    //_mod_iden_data.timestamp = hrt_absolute_time();
-    //_mod_iden_pub.publish(_mod_iden_data);
-    //PX4_INFO("-------------------------");
 }
 
 
@@ -457,143 +408,6 @@ AcrobaticCommand::acro_safety_pre_check()
 */
 
 //quat_uvw2xyz();
-//void
-//AcrobaticCommand::DMP_calculate(dmpPar_str dmpPar)
-//{
-//    matrix::Dcmf _R_att;
-//    _R_att = matrix::Dcm<float>(_att_q);
-
-//    /*-------------- Initial DMP state ------------*/
-//    currState.DQuat = dmpPar.InitDQ;
-//    currState.Twist = dmpPar.InitTW;
-//    //Have not add the degration factor yet
-//    dmpState.push_back(currState);
-
-//    int32_t itNum = 1;
-//    matrix::DualQuaternion<float> dqe;
-//    dqe = DQuatError(dmpPar.GoalDQ, currState.DQuat);
-//    matrix::DualQuaternionf dquaterror;
-//    dquaterror = dqe.DQError_truepos();
-//    // in the dmp function
-//    float posErrNorm = dquaterror.m_dual.norm();
-//    float quaterrNorm = dquaterror.m_real.norm();
-
-//    /*--------------- Intialize to zero -------------*/
-
-//    /*---------------- Loop and calculate the dmp ---------------*/
-//    while((posErrNorm>posErr || quaterrNorm>quatErr) && itNum<maxIter)
-//    {
-//        computeNextStateDQuatDMP(dmpPar);
-//        currState = nextState;
-//        currClock = nextClock;
-//        itNum += 1;
-
-//        // Store DMP states
-//        dmpState.push_back(currState);
-//        // in the dmp function
-//        x_dq1.push_back(x_dq);
-//        gausst_dq1.push_back(gausst_dq);
-//        gauss_dq1.push_back(gauss_dq);
-//        psi_dq1.push_back(psi_dq);
-//        gaussW_dq1.push_back(gaussW_dq);
-
-//        //Recalculate distance to the goal
-//        dqe = DQuatError(dmpPar.GoalDQ, currState.DQuat);
-//        matrix::DualQuaternionf dquatErr;
-//        dquatErr = dqe.DQError_truepos();
-//        posErrNorm = dquatErr.m_dual.norm();
-//        quaterrNorm = dquatErr.m_real.norm();
-//    }
-//}
-
-void
-AcrobaticCommand::dmpPar_init(void)
-{
-    dmpPar_val.alphaDQuat = 0.05; //Decay coefficientalt
-    dmpPar_val.tauDQuat = 1; //time scale
-    dmpPar_val.sigmaDQuat = 0.1;
-    // in the dmp function
-    //Set the gain
-    dmpPar_val.KDQuat_q = 1; // Attitude gain
-    dmpPar_val.dDQuat_q = 10*sqrt(dmpPar_val.KDQuat_q*dmpPar_val.tauDQuat); // Attitude damping
-    dmpPar_val.kDQuat_p = 1; // Position gain
-    dmpPar_val.dDQuat_p = 10*sqrt(dmpPar_val.kDQuat_p*dmpPar_val.tauDQuat); // Position damping
-    dmpPar_val.dtDQuat = 0.01;
-}
-
-//void
-//AcrobaticCommand::computeNextStateDQuatDMP(const dmpPar_str dmpPar)
-//{
-//    /*------------------ Get DMP parameters --------------------*/
-//    float alphaDQuat = dmpPar.alphaDQuat;
-//    float tauDQuat = dmpPar.tauDQuat;
-//    float kDQuat_q = dmpPar.KDQuat_q;
-//    float dDQuat_q = dmpPar.dDQuat_q;
-//    float kDQuat_p = dmpPar.kDQuat_p;alt
-//    float dDQuat_p =dmpPar.dDQuat_p;
-//    matrix::DualQuaternionf goalDQuat = dmpPar.GoalDQ;
-//    matrix::DualQuaternionf initDQuat = dmpPar.InitDQ;
-//    float dtDQuat = dmpPar.dtDQuat;
-//    Array<float,2> kDQ
-//quat_uvw2xyz();uat;
-//    kDQuat[0] = kDQuat_q; kDQuat[1] = kDQuat_p;
-//    Array<float,2> dDQuat;
-//    dDQuat[0] = dDQuat_q; dDQuat[1] = dDQuat_p;
-
-//    float x1 = currClock.x;
-//    float t1 = currClock.t;
-
-//    /*------------------- Update DMP state -----------------------*/
-//    x1 = x1 + (-1*alphaDQuat*x1)*dtDQuat ;
-//    nextClock.x = x1;
-//    nextClock.t = t1 + dmpPar.dtDQuat;
-
-//    matrix::DualQuaternionf dqe;
-//    dqe = DQuatError(goalDQuat, currState.DQuat);
-//    matrix::DualQuaternionf dquatErr;
-//    dquatErr = dqe.DQError_truepos();
-//    dqe = DQuatError(goalDQuat, initDQuat);
-//    matrix::DualQuaternionf dquatDis;
-//    dquatDis = dqe.DQError_truepos()*x1;
-
-
-//    // Calculate the twist acceleration
-//    matrix::DualQuaternionf TwistAcc;
-//    TwistAcc = ((dquatErr - dquatDis) * kDQuat - currState.Twist * dDQuat)/tauDQuat;
-//    //Compute nonlinear forcing term
-//    dmpNonlinearForce(dmpPar.dquatForceW,
-//                                             dmpPar.dquatCenter,
-//                                             dmpPar.dquatAmp,
-//                                             dmpPar.kDQuat,
-//                                             x1, t1);
-//    TwistAcc = TwistAcc +_dmpnon_linear_force;
-//    nextState.TwistAcc = TwistAcc;
-//    nextState.Twist = currState.Twist + TwistAcc*dtDQuat;
-//    nextState.DQuat = DQuatIntegral(currState.DQuat, nextState.Twist, dtDQuat);
-//    x_dq = x1;
-//}
-
-//void
-//AcrobaticCommand::dmpN
-//quat_uvw2xyz();onlinearForce(matrix::Matrix<float, 8, nCompDQuat> forceW,
-//                       matrix::Matrix<float, 1, nCompDQuat> center,
-//                       matrix::Matrix<float, 1, nCompDQuat> amplitude,
-//                       matrix::Matrix<float, 8, 8> K,
-//                       float clockSignal, float t)
-//{
-//    float nComponents = nCompDQuat;
-//    float psi_sum = 0;
-//    for(int i=0; i<nComponents; i++)
-//    {
-//        psi_dq(i,0) = gaussPDF(clockSignal, center(i,0), amplitude(i,0));
-//        gausst_dq(i,0) = gaussPDF(t, center(i,0), amplitude(i,0));
-//        gauss_dq(i,0) = psi_dq(i,0);
-//        psi_sum += psi_dq(i,0);
-//    }
-//    psi_dq = psi_dq/psi_sum;
-//    //Compute forcing term
-//    _dmpnon_linear_force = K*forceW*psi_dq*clockSignal;
-//}
 
 template <typename T>
 DualQuaternion<T> AcrobaticCommand::DQuatProduct(const DualQuaternion<T> dq1,
@@ -609,31 +423,6 @@ AcrobaticCommand::DQuatIntegral(DualQuaternion<float> dq, DualQuaternion<float> 
 {
     return DQuatProduct(dq, DQuatExponential(twist/2 * dt));
 }
-
-//DualQuaternion<float>
-//AcrobaticCommand::DQuatError(matrix::DualQuaternion<float> dq1, matrix::DualQuaternion<float> dq2)
-//{
-//    return DQuatProduct(dq2.conjugate(), dq1);
-//}
-
-
-//float
-//AcrobaticCommand::gaussPDF(float Data, float Mu, float Sigma)
-//{
-//    float Data_temp;alt
-//    Data_temp = Data - Mu;
-//    float prob_temp;
-//    float prob;
-//    prob_temp = Data_temp * Data_temp / Sigma;
-//    // Removed the realmin in matlab
-//    prob = exp(-float(0.5)*prob_temp) / sqrt(2*float(PI)*(abs(Sigma)));
-//    return prob;
-//}
-
-
-
-
-
 
 
 void
@@ -668,19 +457,12 @@ AcrobaticCommand::Run()
 
             mavlink_log_info(&_mavlink_log_pub, "time:%lf", now);
             /* ---------------- Subscription -----------------*/
+            // Obtain the current command
             vehicle_cmd_poll();
             vehicle_global_pos_poll();
             // in the dmp function
             vehicle_local_pos_poll();
-            // sensor_accel_poll();
-            //actuator_controls_poll();
-            //manual_status_poll();
-            //vstatus_poll();
-            //vehicle_angular_rates_poll();
-            //PX4_INFO("_vehicle_cmd.command:%d",_vehicle_cmd.command);
 
-            /*----------------- Initialize the dmp -------------*/
-            dmpPar_init();
             // only update parameters if they changed
             bool params_updated = _parameter_update_sub.updated();
 
@@ -706,10 +488,11 @@ AcrobaticCommand::Run()
                     _time_first_acrobatic = now;
                     //initial altitude
                     _alt_first_acrobatic = _global_pos.alt; //The altitude is z*-1 + alt_init
+                    //During the pugachev maneuver, the attitude is assumed to be unchanged
                     _alt_sp_acrobatic = _alt_first_acrobatic;
                     //initial quaternion
                     _quat_first_acro = _att_q;
-                    //initial position
+                    //initial position(local_position)
                     _xyz_first_acro[0] = _local_pos.x;
                     _xyz_first_acro[1] = _local_pos.y;
                     _xyz_first_acro[2] = _local_pos.z;
@@ -719,14 +502,14 @@ AcrobaticCommand::Run()
 
                 //mavlink_log_info(&_mavlink_log_pub, "TEST_DATA_PATH");
                 switch (_vehicle_cmd.acrobatic_name) {
-                /**< loop maneuver */
+                /**< pugachev maneuver */
                 case 0:
-                    filepath_att = "/fs/microsd/data/loop_att.txt";
-                    filepath_pqr = "/fs/microsd/data/loop_pqr.txt";
-                    //filepath_pqr_uvw = "/fs/microsd/data/immelman_pqr_uvw.txt";
-                    filepath_pqr_uvw = "/fs/microsd/data/fast_climb_pqr_uvw.txt";
+                    filepath_att = "/fs/microsd/data/high_angle_att.txt";
+                    filepath_pqr = "/fs/microsd/data/high_angle_pqr.txt";
+                    //filepath_pqr_uvw = "/fs/microsd/data/pugachev_pqr_uvw.txt";
+                    filepath_pqr_uvw = "/fs/microsd/data/high_angle_pqr_uvw.txt";
                     break;
-                    /**< Immelman maneuver */
+                /**< Immelman maneuver */
                 case 1:
                     filepath_att = "/fs/microsd/data/immelman_att.txt";
                     filepath_pqr = "/fs/microsd/data/immelman_pqr.txt";
@@ -743,7 +526,7 @@ AcrobaticCommand::Run()
                     //Obtain the acrobatic command
                     acro_data_read();
                     //pqr_uvw_acro_data_read();
-                    pqr2quat();
+                    pqr2quat(); //The attitude command needs to be integrated
                     //quat_uvw2xyz();
                     file_readed = true;
                 }
@@ -767,10 +550,6 @@ AcrobaticCommand::Run()
 
 
                 /**< Obtain the matrix Tf */
-                //vehicle_att_poll();
-                //_quat_err = (_quat_cmd - _att_q)/_tc * 2;
-                //_quat_err = _quat_cmd - _att_q;
-                //_quat_err = (_quat_cmd - _att_q)/_tc /1.5;
                 _fw_acro_q0_tc = _parameters._fw_acro_q0_tc;
                 _fw_acro_q1_tc = _parameters._fw_acro_q1_tc;
                 _fw_acro_q2_tc = _parameters._fw_acro_q2_tc;
@@ -796,7 +575,7 @@ AcrobaticCommand::Run()
                         + 2 * _att_q(2) * _quat_err(1) - 2 * _att_q(3) * _quat_err(0);
 
                 _acrobatic_cmd.timestamp = hrt_absolute_time();
-
+                //This is the actual desired anglular rates
                 _acrobatic_cmd.body_rates_cmd[0] = _body_setpoint[0];
                 _acrobatic_cmd.body_rates_cmd[1] = _body_setpoint[1];
                 _acrobatic_cmd.body_rates_cmd[2] = _body_setpoint[2];
@@ -821,7 +600,7 @@ AcrobaticCommand::Run()
                 //_alt_sp_acrobatic += (float)((now-time_prev)/1e6)
                 //float u = _local_pos.vx;
                 //float v = _local_pos.vy;
-                float w = _local_pos.vz;
+                //float w = _local_pos.vz;
 
                 /*_alt_first_acrobatic += (float)((now-time_prev)/1e6) *
                         (2*(_att_q(1)*_att_q(3)-_att_q(0)*_att_q(2))*u +
@@ -829,7 +608,10 @@ AcrobaticCommand::Run()
                          (_att_q(0)*_att_q(0)-_att_q(1)*_att_q(1)-_att_q(2)*_att_q(2)+_att_q(3)*_att_q(3))*w);*/
 
                 /*The old version (altitude command)*/
-                _alt_sp_acrobatic += -1 * (float)((now-time_prev)/1e6) * w; //transfer according to the frame
+                //_alt_sp_acrobatic += -1 * (float)((now-time_prev)/1e6) * w; //transfer according to the frame
+                //The altitude command will not change during pugachev maneuver
+
+
                 _acrobatic_cmd.alt_sp_acrobatic = _alt_sp_acrobatic;
 
                 /*The new version (altitude command)*/
@@ -844,16 +626,6 @@ AcrobaticCommand::Run()
                 //PX4_INFO("_quat:%f,%f,%f,%f",(double)_att_q(0),(double)_att_q(1),(double)_att_q(2),(double)_att_q(3));
 
                 _acro_cmd_pub.publish(_acrobatic_cmd);
-
-                //prepare and publish the dmp test value
-                //_dmp_test.timestamp = hrt_absolute_time();
-                //_dmp_test.quaternion_integrated[0] = _quat_cmd(0);
-                //_dmp_test.quaternion_integrated[1] = _quat_cmd(1);
-                //_dmp_test.quaternion_integrated[2] = _quat_cmd(2);
-                //_dmp_test.quaternion_integrated[3] = _quat_cmd(3);
-                //_dmp_test.xyz_integrated[0] = _xyz_cmd[0];
-                //_dmp_test.xyz_integrated[1] = _xyz_cmd[1];
-                //_dmp_test.xyz_integrated[2] = _xyz_cmd[2];
 
                 //_dmp_test_pub.publish(_dmp_test); //the dmp information publication
                 //PX4_INFO("publishing time:%ld", now);
