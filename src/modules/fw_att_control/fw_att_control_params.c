@@ -785,37 +785,15 @@ PARAM_DEFINE_FLOAT(FW_DTRIM_P_FLPS, 0.0f);
 */
 
 
-
 /**
-* Fixed-wing w velocity control parameters
+* Fixed-wing roll rate control parameters
 */
 
-PARAM_DEFINE_FLOAT(FW_DQ_W_I, 0.2f);
+PARAM_DEFINE_FLOAT(FW_KP_RR_MIN, 0.05f);
 
-PARAM_DEFINE_FLOAT(FW_DQ_W_FF, 0.01f);
+PARAM_DEFINE_FLOAT(FW_KP_RR_MEDIUM, 0.1f);
 
-PARAM_DEFINE_FLOAT(FW_DQ_W_P, 0.08f);
-
-/** 
-* Fixed-wing v velocity control parameters
-*/
-
-PARAM_DEFINE_FLOAT(FW_DQ_V_I, 0.0f);
-
-PARAM_DEFINE_FLOAT(FW_DQ_V_FF, 0.0f);
-
-PARAM_DEFINE_FLOAT(FW_DQ_V_P, 0.1f);
-
-
-/**
-* Fixed-wing p velocity control parameters
-*/
-
-PARAM_DEFINE_FLOAT(FW_DQ_P_P, 0.8f);
-
-PARAM_DEFINE_FLOAT(FW_DQ_P_FF, 0.1f);
-
-PARAM_DEFINE_FLOAT(FW_DQ_P_I, 0.3f);
+PARAM_DEFINE_FLOAT(FW_KP_RR_MAX, 0.2f);
 
 
 

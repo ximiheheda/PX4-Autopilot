@@ -120,18 +120,9 @@ FixedwingAttitudeControl::FixedwingAttitudeControl() :
     _parameter_handles.bat_scale_en = param_find("FW_BAT_SCALE_EN");
     _parameter_handles.airspeed_mode = param_find("FW_ARSP_MODE");
     // Acrobatic Related
-    //Related to velocity w
-     _parameter_handles.fw_dq_w_i = param_find("FW_DQ_W_I");
-     _parameter_handles.fw_dq_w_ff = param_find("FW_DQ_W_FF");
-     _parameter_handles.fw_dq_w_p = param_find("FW_DQ_W_P");
-    //Related to velocity v
-     _parameter_handles.fw_dq_v_i = param_find("FW_DQ_V_I");
-     _parameter_handles.fw_dq_v_ff = param_find("FW_DQ_V_FF");
-     _parameter_handles.fw_dq_v_p = param_find("FW_DQ_V_P");
-    //Related to angular rates p
-     _parameter_handles.fw_dq_p_i = param_find("FW_DQ_P_I");
-     _parameter_handles.fw_dq_p_ff = param_find("FW_DQ_P_FF");
-     _parameter_handles.fw_dq_p_p = param_find("FW_DQ_P_P");
+     _parameter_handles.fw_kp_rr_min = param_find("FW_KP_RR_MIN");
+     _parameter_handles.fw_kp_rr_medium = param_find("FW_KP_RR_MEDIUM");
+     _parameter_handles.fw_kp_rr_max = param_find("FW_KP_RR_MAX");
     //Offset in virtual frame
      _parameter_handles.fw_dq_delta_x = param_find("FW_DQ_DELTA_X");
     //Angular rates TC
@@ -257,17 +248,9 @@ FixedwingAttitudeControl::parameters_update()
     _parameters.airspeed_disabled = (tmp == 1);
 
     // Acrobatic Related
-    param_get(_parameter_handles.fw_dq_w_i, &(_parameters.fw_dq_w_i));
-    param_get(_parameter_handles.fw_dq_w_ff, &(_parameters.fw_dq_w_ff));
-    param_get(_parameter_handles.fw_dq_w_p, &(_parameters.fw_dq_w_p));
-
-    param_get(_parameter_handles.fw_dq_v_i, &(_parameters.fw_dq_v_i));
-    param_get(_parameter_handles.fw_dq_v_ff, &(_parameters.fw_dq_v_ff));
-    param_get(_parameter_handles.fw_dq_v_p, &(_parameters.fw_dq_v_p));
-
-    param_get(_parameter_handles.fw_dq_p_i, &(_parameters.fw_dq_p_i));
-    param_get(_parameter_handles.fw_dq_p_ff, &(_parameters.fw_dq_p_ff));
-    param_get(_parameter_handles.fw_dq_p_p, &(_parameters.fw_dq_p_p));
+    param_get(_parameter_handles.fw_kp_rr_min, &(_parameters.fw_kp_rr_min));
+    param_get(_parameter_handles.fw_kp_rr_medium, &(_parameters.fw_kp_rr_medium));
+    param_get(_parameter_handles.fw_kp_rr_max, &(_parameters.fw_kp_rr_max));
 
     /* pitch control parameters */
     _pitch_ctrl.set_time_constant(_parameters.p_tc);
@@ -276,10 +259,6 @@ FixedwingAttitudeControl::parameters_update()
     _pitch_ctrl.set_k_ff(_parameters.p_ff);
     _pitch_ctrl.set_integrator_max(_parameters.p_integrator_max);
     //added by caosu
-    //_pitch_ctrl.set_acro_k_p(_parameters.acro_pr_p);
-    _pitch_ctrl.set_acro_k_p(_parameters.fw_dq_w_p);
-    _pitch_ctrl.set_acro_k_ff(_parameters.fw_dq_w_ff);
-    _pitch_ctrl.set_acro_k_i(_parameters.fw_dq_w_i);
 
     /* roll control parameters */
     _roll_ctrl.set_time_constant(_parameters.r_tc);
@@ -287,12 +266,13 @@ FixedwingAttitudeControl::parameters_update()
     _roll_ctrl.set_k_i(_parameters.r_i);
     _roll_ctrl.set_k_ff(_parameters.r_ff);
     _roll_ctrl.set_integrator_max(_parameters.r_integrator_max);
+
     //added by caosu
     //_roll_ctrl.set_acro_k_p(_parameters.acro_rr_p);
     _roll_ctrl.set_k_d(_parameters.r_d);
-    _roll_ctrl.set_acro_k_p(_parameters.fw_dq_p_p);
-    _roll_ctrl.set_acro_k_ff(_parameters.fw_dq_p_ff);
-    _roll_ctrl.set_acro_k_i(_parameters.fw_dq_p_i);
+    _roll_ctrl.set_acro_k_p_min(_parameters.fw_kp_rr_min);
+    _roll_ctrl.set_acro_k_p_medium(_parameters.fw_kp_rr_medium);
+    _roll_ctrl.set_acro_k_p_max(_parameters.fw_kp_rr_max);
 
 
     /* yaw control parameters */
@@ -300,10 +280,6 @@ FixedwingAttitudeControl::parameters_update()
     _yaw_ctrl.set_k_i(_parameters.y_i);
     _yaw_ctrl.set_k_ff(_parameters.y_ff);
     _yaw_ctrl.set_integrator_max(_parameters.y_integrator_max);
-    //added by caosu
-    _yaw_ctrl.set_acro_k_p(_parameters.fw_dq_v_p);
-    _yaw_ctrl.set_acro_k_ff(_parameters.fw_dq_v_ff);
-    _yaw_ctrl.set_acro_k_i(_parameters.fw_dq_v_i);
 
     /* wheel control parameters */
     _wheel_ctrl.set_k_p(_parameters.w_p);
@@ -907,6 +883,9 @@ void FixedwingAttitudeControl::Run()
                         //control_input.roll_rate_setpoint = _roll_ctrl.get_desired_rate();
                         //control_input.pitch_rate_setpoint = _pitch_ctrl.get_desired_rate();
                         //control_input.yaw_rate_setpoint = _yaw_ctrl.get_desired_rate();
+//                        control_input.roll_rate_setpoint = _acrobatic_cmd.body_rates_cmd[0];
+//                        control_input.pitch_rate_setpoint = _acrobatic_cmd.body_rates_cmd[1];
+//                        control_input.yaw_rate_setpoint = _acrobatic_cmd.body_rates_cmd[2];
                         control_input.body_p_setpoint = _acrobatic_cmd.body_rates_cmd[0];
                         control_input.body_q_setpoint = _acrobatic_cmd.body_rates_cmd[1];
                         control_input.body_r_setpoint = _acrobatic_cmd.body_rates_cmd[2];

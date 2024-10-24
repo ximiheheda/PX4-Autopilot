@@ -12,6 +12,7 @@
 #include <px4_log.h>
 #include <systemlib/mavlink_log.h>
 #include <matrix/QuaternionMapping.h>
+#include <eigen3/Eigen/Dense>
 using namespace time_literals;
 using matrix::Quatf;
 //#if defined(CONFIG_ARCH_BOARD_PX4_SITL)
@@ -140,44 +141,14 @@ AcrobaticCommand::vstatus_poll()
 void
 AcrobaticCommand::acro_data_read() /**< This function needs to run in the init section */
 {
-    FILE *fp_att = nullptr;
     FILE *fp_pqr = nullptr;
     mavlink_log_info(&_mavlink_log_pub, "reading file~~~");
     //PX4_INFO("filepath:%s",filepath);
     //filepath = "/fs/microsd/data/loopdata.txt";
 
-    if((fp_att = fopen(filepath_att, "r"))==nullptr)
-    {
-        mavlink_log_info(&_mavlink_log_pub, "file open error%s",filepath_att);
-    }
-    else
-    {
-        mavlink_log_info(&_mavlink_log_pub, "filepath %s open success", filepath_att);
-    }
-
     /**< Init the parser */
     int ret;
     unsigned long int time;
-    Quatf q_temp;
-    quat_time q_t_temp;
-
-    while (EOF != (ret = fscanf(fp_att, "%ld, \t%f, \t%f, \t%f, \t%f", &time, &q_temp(0), &q_temp(1), &q_temp(2), &q_temp(3))))
-    {
-        if(ret <= 0){
-            fclose(fp_att);
-        }
-        //q_t_temp.quat_v = q_temp;
-        //q_t_temp.time_v = time;
-
-        //_quat_time_l.push_back(q_t_temp);
-        //_time_v.push_back(time);
-        //_quat_v.push_back(q_temp);
-        //PX4_INFO("-----------------------------------------");
-        //PX4_INFO("time:%ld",time);m
-        //PX4_INFO("q_temp:%f,%f,%f,%f",(double)q_temp(0),(double)q_temp(1),(double)q_temp(2),(double)q_temp(3));
-    }
-
-    fclose(fp_att);
 
     if((fp_pqr = fopen(filepath_pqr, "r"))==nullptr)
     {
@@ -192,7 +163,7 @@ AcrobaticCommand::acro_data_read() /**< This function needs to run in the init s
 
     pqr_time pqr_temp_t;
 
-    while(EOF != (ret = fscanf(fp_pqr, "%ld, \t%f, \t%f,\t%f", &time, &pqr_temp[0], &pqr_temp[1], &pqr_temp[2])))
+    while(EOF != (ret = fscanf(fp_pqr, "%ld\t%f\t%f\t%f", &time, &pqr_temp[0], &pqr_temp[1], &pqr_temp[2])))
     {
         if(ret <= 0){
             fclose(fp_pqr);
@@ -203,9 +174,10 @@ AcrobaticCommand::acro_data_read() /**< This function needs to run in the init s
 
         pqr_temp_t.time_v = time;
         _pqr_time_l.push_back(pqr_temp_t);
+        mavlink_log_info(&_mavlink_log_pub, "pqr reading time: %d", time);
     }
     fclose(fp_pqr);
-    mavlink_log_info(&_mavlink_log_pub, "attitude and pqr readed succesfully! length: %d", _pqr_time_l.size());
+    mavlink_log_info(&_mavlink_log_pub, "attitude and pqr readed", _pqr_time_l.size());
 
 }
 
@@ -455,7 +427,7 @@ AcrobaticCommand::Run()
 
             _start_count ++;
 
-            mavlink_log_info(&_mavlink_log_pub, "time:%lf", now);
+            //mavlink_log_info(&_mavlink_log_pub, "time:%lf", now);
             /* ---------------- Subscription -----------------*/
             // Obtain the current command
             vehicle_cmd_poll();
@@ -477,7 +449,7 @@ AcrobaticCommand::Run()
                 parameters_update();
             }
             // Test the current navigation status
-            mavlink_log_info(&_mavlink_log_pub, "Current Navigation Status: %d", _vstatus.nav_state);
+            //mavlink_log_info(&_mavlink_log_pub, "Current Navigation Status: %d", _vstatus.nav_state);
 
             /**< If we are not in the acrobatic mode, do nothing */
             if(_vehicle_cmd.command == vehicle_command_s::VEHICLE_CMD_DO_ACROBATIC && _start_count > 0)
@@ -511,10 +483,10 @@ AcrobaticCommand::Run()
                     break;
                 /**< Immelman maneuver */
                 case 1:
-                    filepath_att = "/fs/microsd/data/immelman_att.txt";
-                    filepath_pqr = "/fs/microsd/data/immelman_pqr.txt";
-                    //filepath_pqr_uvw = "/fs/microsd/data/immelman_pqr_uvw.txt";
-                    filepath_pqr_uvw = "/fs/microsd/data/fast_climb_pqr_uvw.txt";
+                    filepath_att = "/fs/microsd/data/high_angle_pqr.txt";
+                    filepath_pqr = "/fs/microsd/data/high_angle_pqr.txt";
+                    //filepath_pqr_uvw = "/fs/microsd/data/high_angle_pqr_uvw.txt";
+                    filepath_pqr_uvw = "/fs/microsd/data/high_angle_pqr_uvw.txt";
                     break;
                     /**< default read nothing, keep straight flight*/
                 default: break;
@@ -525,10 +497,11 @@ AcrobaticCommand::Run()
                 {
                     //Obtain the acrobatic command
                     acro_data_read();
+                    file_readed = true;
                     //pqr_uvw_acro_data_read();
                     pqr2quat(); //The attitude command needs to be integrated
                     //quat_uvw2xyz();
-                    file_readed = true;
+                    mavlink_log_info(&_mavlink_log_pub, "file readed");
                 }
 
                 /* Obtain the custom defined acrobatic motion command*/
@@ -539,9 +512,107 @@ AcrobaticCommand::Run()
                 //_quat_cmd = interp_1_d();
 
                 _quat_cmd = interp_1_d_quat();
-                _xyz_cmd = interp_1_d_xyz();
+                //_xyz_cmd = interp_1_d_xyz();
 
                 //PX4_INFO("_quat_cmd:%f,%f,%f,%f",(double)_quat_cmd(0),(double)_quat_cmd(1),(double)_quat_cmd(2),(double)_quat_cmd(3));
+
+                //-----------PYF---High AOA--------
+                //---------------------------------
+                //parameters update
+                float m, qbar, sref, Iyy;
+                float alpha, alpha_dot, gamma_ref, gamma;
+                Eigen::Matrix<float,5,1> thetaHat2;
+                Eigen::Matrix<float,5,1> thetaHat3;
+                Eigen::MatrixXf Gamma2(5,5);
+                Gamma2 << 1, 0, 0, 0, 0,
+                          0, 1, 0, 0, 0,
+                          0, 0, 1, 0, 0,
+                          0, 0, 0, 1, 0,
+                          0, 0, 0, 0, 1;
+
+                Eigen::MatrixXf Gamma3(5,5);
+                Gamma3 << 1, 0, 0, 0, 0,
+                          0, 1, 0, 0, 0,
+                          0, 0, 1, 0, 0,
+                          0, 0, 0, 1, 0,
+                          0, 0, 0, 0, 1;
+
+                Eigen::MatrixXf I5(5,5);
+                I5 <<1, 0, 0, 0, 0,
+                        0, 1, 0, 0, 0,
+                        0, 0, 1, 0, 0,
+                        0, 0, 0, 1, 0,
+                        0, 0, 0, 0, 1;
+
+                Eigen::VectorXf eta(5);
+                eta << 1, alpha, alpha*alpha, alpha_dot, alpha_dot*alpha_dot;
+
+                float e_g = gamma_ref - gamma;
+                float e_q;
+                Eigen::VectorXf est2 = -qbar*sref*Gamma2*eta*e_g/m;
+                Eigen::VectorXf est3 = -qbar*sref*Gamma2*eta*e_q/Iyy;
+                float g2 = square((2*thetaHat2.transpose()*eta + 0 - 2)/2) -1;
+                float g3 = square((2*thetaHat3.transpose()*eta + 0 - 2)/2) -1;
+
+                Eigen::VectorXf gra2 = 2*((2*thetaHat2.transpose()*eta + 0 - 2)/2)*2*eta/2;
+                Eigen::VectorXf gra3 = 2*((2*thetaHat3.transpose()*eta + 0 - 2)/2)*2*eta/2;
+
+                float pro2 = gra2*est2;
+                int flag2;
+                if (abs(g2)<0 && pro2 <=0){
+                    flag2 = 1;
+                }else{
+                    flag2 = 0;
+                }
+
+                float pro3 = gra3*est3;
+                int flag3;
+                if (abs(g3)<0 && pro3 <=0){
+                    flag3 = 1;
+                }else{
+                    flag3 = 0;
+                }
+
+                Eigen::VectorXf thetaHatDot2;
+                if (abs(g2)<0 || flag2==1){
+                    thetaHatDot2 = est2;
+                }else{
+                    thetaHatDot2 = (I5 - (gra2 * gra2.transpose()));
+                }
+
+                Eigen::VectorXf thetaHatDot3;
+                if (abs(g2)<0 || flag3==1){
+                    thetaHatDot3 = est3;
+                }else{
+                    thetaHatDot3 = (I5 - (gra3 * gra3.transpose()));
+                }
+
+                //controller for maneuver
+                float ct = 1, cq = 1, cg = 1;
+                float alpha_ref, theta, q, Vt;
+
+                float uth = 1/sin(alpha)*(-qbar*sref*thetaHat2.transpose()*eta + m*Vt*cg*(-gamma));
+                float uq = ct*(alpha_ref + gamma - theta);
+                float ude = cq*(uq - q) - thetaHat3*eta;//attention!!!
+
+                float h_ref = 0;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
                 float _rollspeed = _vehicle_angular_vel.xyz[0];
@@ -589,6 +660,8 @@ AcrobaticCommand::Run()
                 _acrobatic_cmd.angular_velocity[1] = _pitchspeed;
                 _acrobatic_cmd.angular_velocity[2] = _yawspeed;
 
+                _acrobatic_cmd.do_acrobatic = true;
+
                 /**< count if the acrobatic is finished*/
                 // Add another condition: vehicle status is changed to manual or return. Time 20210712
                 if(_finish_count >= 50)
@@ -608,9 +681,10 @@ AcrobaticCommand::Run()
                          (_att_q(0)*_att_q(0)-_att_q(1)*_att_q(1)-_att_q(2)*_att_q(2)+_att_q(3)*_att_q(3))*w);*/
 
                 /*The old version (altitude command)*/
-                //_alt_sp_acrobatic += -1 * (float)((now-time_prev)/1e6) * w; //transfer according to the frame
+//                _alt_sp_acrobatic += -1 * (float)((now-time_prev)/1e6) * w; //transfer according to the frame
                 //The altitude command will not change during pugachev maneuver
-
+                _acrobatic_cmd.airsp_sp = 20;
+                _alt_sp_acrobatic = _alt_first_acrobatic;
 
                 _acrobatic_cmd.alt_sp_acrobatic = _alt_sp_acrobatic;
 

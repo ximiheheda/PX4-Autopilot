@@ -248,20 +248,14 @@ private:
 		bool airspeed_disabled;
 
         // Acrobatic Related
-        float fw_dq_w_i;
-        float fw_dq_w_ff;
-        float fw_dq_w_p;
-        float fw_dq_v_i;
-        float fw_dq_v_ff;
-        float fw_dq_v_p;
-        float fw_dq_p_i;
-        float fw_dq_p_ff;
-        float fw_dq_p_p;
         float fw_dq_delta_x;
         float fw_acro_q0_tc;
         float fw_acro_q1_tc;
         float fw_acro_q2_tc;
         float fw_acro_q3_tc;
+        float fw_kp_rr_min;
+        float fw_kp_rr_medium;
+        float fw_kp_rr_max;
 
 	} _parameters{};			/**< local copies of interesting parameters */
 
@@ -336,15 +330,9 @@ private:
 		param_t airspeed_mode;
 
         // Acrobatic Related
-        param_t fw_dq_w_i;
-        param_t fw_dq_w_ff;
-        param_t fw_dq_w_p;
-        param_t fw_dq_v_i;
-        param_t fw_dq_v_ff;
-        param_t fw_dq_v_p;
-        param_t fw_dq_p_i;
-        param_t fw_dq_p_ff;
-        param_t fw_dq_p_p;
+        param_t fw_kp_rr_min;
+        param_t fw_kp_rr_medium;
+        param_t fw_kp_rr_max;
         param_t fw_dq_delta_x;
         param_t fw_acro_q0_tc;
         param_t fw_acro_q1_tc;

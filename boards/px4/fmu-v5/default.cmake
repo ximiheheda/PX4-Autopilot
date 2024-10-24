@@ -87,8 +87,8 @@ px4_add_board(
                	acrobatic_command
 		# acrobatic_L1
 		# acrobatic_DQ
-		acrobatic_pose_control
-		acrobatic_commander
+		# acrobatic_pose_control
+		# acrobatic_commander
 
 	SYSTEMCMDS
 		bl_update
