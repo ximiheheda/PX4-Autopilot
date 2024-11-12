@@ -178,7 +178,7 @@ AcrobaticL1::Run()
 
             vehicle_global_pos_poll();
             vehicle_local_pos_poll(); //read the current velocity
-            _sensor_com_sub.update(&_sensor_com);
+            //_sensor_com_sub.update(&_sensor_com);
             now = hrt_absolute_time();
             //PX4_INFO("Running ~~~");
             //mavlink_log_info(&_mavlink_log_pub, "accel_x:%f\taccel_y:%f\taccel_y%f\n",

@@ -12,7 +12,8 @@
 #include <px4_log.h>
 #include <systemlib/mavlink_log.h>
 #include <matrix/QuaternionMapping.h>
-#include <eigen3/Eigen/Dense>
+//#include <eigen3/Eigen/Dense>
+
 using namespace time_literals;
 using matrix::Quatf;
 //#if defined(CONFIG_ARCH_BOARD_PX4_SITL)
@@ -163,7 +164,7 @@ AcrobaticCommand::acro_data_read() /**< This function needs to run in the init s
 
     pqr_time pqr_temp_t;
 
-    while(EOF != (ret = fscanf(fp_pqr, "%ld\t%f\t%f\t%f", &time, &pqr_temp[0], &pqr_temp[1], &pqr_temp[2])))
+    while(EOF != (ret = fscanf(fp_pqr, "%ld,\t%f,\t%f,\t%f", &time, &pqr_temp[0], &pqr_temp[1], &pqr_temp[2])))
     {
         if(ret <= 0){
             fclose(fp_pqr);
@@ -266,6 +267,86 @@ AcrobaticCommand::interp_1_d_xyz()
     }
     return _xyz_time_l[index].xyz_v;
 }
+//-----------PYF---High AOA--------
+//---------------------------------
+//parameters update
+//float m, qbar, sref, Iyy;
+//float alpha, alpha_dot, gamma_ref, gamma;
+//Eigen::Matrix<float,5,1> thetaHat2;
+//Eigen::Matrix<float,5,1> thetaHat3;
+//Eigen::MatrixXf Gamma2(5,5);
+//Gamma2 << 1, 0, 0, 0, 0,
+//          0, 1, 0, 0, 0,
+//          0, 0, 1, 0, 0,
+//          0, 0, 0, 1, 0,
+//          0, 0, 0, 0, 1;
+
+//Eigen::MatrixXf Gamma3(5,5);
+//Gamma3 << 1, 0, 0, 0, 0,
+//          0, 1, 0, 0, 0,
+//          0, 0, 1, 0, 0,
+//          0, 0, 0, 1, 0,
+//          0, 0, 0, 0, 1;
+
+//Eigen::MatrixXf I5(5,5);
+//I5 <<1, 0, 0, 0, 0,
+//        0, 1, 0, 0, 0,
+//        0, 0, 1, 0, 0,
+//        0, 0, 0, 1, 0,
+//        0, 0, 0, 0, 1;
+
+//Eigen::VectorXf eta(5);
+//eta << 1, alpha, alpha*alpha, alpha_dot, alpha_dot*alpha_dot;
+
+//float e_g = gamma_ref - gamma;
+//float e_q;
+//Eigen::VectorXf est2 = -qbar*sref*Gamma2*eta*e_g/m;
+//Eigen::VectorXf est3 = -qbar*sref*Gamma2*eta*e_q/Iyy;
+//float g2 = square((2*thetaHat2.transpose()*eta + 0 - 2)/2) -1;
+//float g3 = square((2*thetaHat3.transpose()*eta + 0 - 2)/2) -1;
+
+//Eigen::VectorXf gra2 = 2*((2*thetaHat2.transpose()*eta + 0 - 2)/2)*2*eta/2;
+//Eigen::VectorXf gra3 = 2*((2*thetaHat3.transpose()*eta + 0 - 2)/2)*2*eta/2;
+
+//float pro2 = gra2*est2;
+//int flag2;
+//if (abs(g2)<0 && pro2 <=0){
+//    flag2 = 1;
+//}else{
+//    flag2 = 0;
+//}
+
+//float pro3 = gra3*est3;
+//int flag3;
+//if (abs(g3)<0 && pro3 <=0){
+//    flag3 = 1;
+//}else{
+//    flag3 = 0;
+//}
+
+//Eigen::VectorXf thetaHatDot2;
+//if (abs(g2)<0 || flag2==1){
+//    thetaHatDot2 = est2;
+//}else{
+//    thetaHatDot2 = (I5 - (gra2 * gra2.transpose()));
+//}
+
+//Eigen::VectorXf thetaHatDot3;
+//if (abs(g2)<0 || flag3==1){
+//    thetaHatDot3 = est3;
+//}else{
+//    thetaHatDot3 = (I5 - (gra3 * gra3.transpose()));
+//}
+
+//controller for maneuver
+//float ct = 1, cq = 1, cg = 1;
+//float alpha_ref, theta, q, Vt;
+
+//float uth = 1/sin(alpha)*(-qbar*sref*thetaHat2.transpose()*eta + m*Vt*cg*(-gamma));
+//float uq = ct*(alpha_ref + gamma - theta);
+//float ude = cq*(uq - q) - thetaHat3*eta;//attention!!!
+
+//float h_ref = 0;
 
 void
 AcrobaticCommand::pqr2quat()
@@ -483,10 +564,10 @@ AcrobaticCommand::Run()
                     break;
                 /**< Immelman maneuver */
                 case 1:
-                    filepath_att = "/fs/microsd/data/high_angle_pqr.txt";
-                    filepath_pqr = "/fs/microsd/data/high_angle_pqr.txt";
+                    filepath_att = "/fs/microsd/data/half_cuban_eight_att.txt";
+                    filepath_pqr = "/fs/microsd/data/half_cuban_eight_pqr.txt";
                     //filepath_pqr_uvw = "/fs/microsd/data/high_angle_pqr_uvw.txt";
-                    filepath_pqr_uvw = "/fs/microsd/data/high_angle_pqr_uvw.txt";
+                    //filepath_pqr_uvw = "/fs/microsd/data/high_angle_pqr_uvw.txt";
                     break;
                     /**< default read nothing, keep straight flight*/
                 default: break;
@@ -516,101 +597,86 @@ AcrobaticCommand::Run()
 
                 //PX4_INFO("_quat_cmd:%f,%f,%f,%f",(double)_quat_cmd(0),(double)_quat_cmd(1),(double)_quat_cmd(2),(double)_quat_cmd(3));
 
-                //-----------PYF---High AOA--------
-                //---------------------------------
-                //parameters update
-                float m, qbar, sref, Iyy;
-                float alpha, alpha_dot, gamma_ref, gamma;
-                Eigen::Matrix<float,5,1> thetaHat2;
-                Eigen::Matrix<float,5,1> thetaHat3;
-                Eigen::MatrixXf Gamma2(5,5);
-                Gamma2 << 1, 0, 0, 0, 0,
-                          0, 1, 0, 0, 0,
-                          0, 0, 1, 0, 0,
-                          0, 0, 0, 1, 0,
-                          0, 0, 0, 0, 1;
+//                //-----------PYF---High AOA--------
+//                //---------------------------------
+//                //parameters update
+//                float m, qbar, sref, Iyy;
+//                float alpha, alpha_dot, gamma_ref, gamma;
+//                Eigen::Matrix<float,5,1> thetaHat2;
+//                Eigen::Matrix<float,5,1> thetaHat3;
+//                Eigen::MatrixXf Gamma2(5,5);
+//                Gamma2 << 1, 0, 0, 0, 0,
+//                          0, 1, 0, 0, 0,
+//                          0, 0, 1, 0, 0,
+//                          0, 0, 0, 1, 0,
+//                          0, 0, 0, 0, 1;
 
-                Eigen::MatrixXf Gamma3(5,5);
-                Gamma3 << 1, 0, 0, 0, 0,
-                          0, 1, 0, 0, 0,
-                          0, 0, 1, 0, 0,
-                          0, 0, 0, 1, 0,
-                          0, 0, 0, 0, 1;
+//                Eigen::MatrixXf Gamma3(5,5);
+//                Gamma3 << 1, 0, 0, 0, 0,
+//                          0, 1, 0, 0, 0,
+//                          0, 0, 1, 0, 0,
+//                          0, 0, 0, 1, 0,
+//                          0, 0, 0, 0, 1;
 
-                Eigen::MatrixXf I5(5,5);
-                I5 <<1, 0, 0, 0, 0,
-                        0, 1, 0, 0, 0,
-                        0, 0, 1, 0, 0,
-                        0, 0, 0, 1, 0,
-                        0, 0, 0, 0, 1;
+//                Eigen::MatrixXf I5(5,5);
+//                I5 <<1, 0, 0, 0, 0,
+//                        0, 1, 0, 0, 0,
+//                        0, 0, 1, 0, 0,
+//                        0, 0, 0, 1, 0,
+//                        0, 0, 0, 0, 1;
 
-                Eigen::VectorXf eta(5);
-                eta << 1, alpha, alpha*alpha, alpha_dot, alpha_dot*alpha_dot;
+//                Eigen::VectorXf eta(5);
+//                eta << 1, alpha, alpha*alpha, alpha_dot, alpha_dot*alpha_dot;
 
-                float e_g = gamma_ref - gamma;
-                float e_q;
-                Eigen::VectorXf est2 = -qbar*sref*Gamma2*eta*e_g/m;
-                Eigen::VectorXf est3 = -qbar*sref*Gamma2*eta*e_q/Iyy;
-                float g2 = square((2*thetaHat2.transpose()*eta + 0 - 2)/2) -1;
-                float g3 = square((2*thetaHat3.transpose()*eta + 0 - 2)/2) -1;
+//                float e_g = gamma_ref - gamma;
+//                float e_q;
+//                Eigen::VectorXf est2 = -qbar*sref*Gamma2*eta*e_g/m;
+//                Eigen::VectorXf est3 = -qbar*sref*Gamma2*eta*e_q/Iyy;
+//                float g2 = square((2*thetaHat2.transpose()*eta + 0 - 2)/2) -1;
+//                float g3 = square((2*thetaHat3.transpose()*eta + 0 - 2)/2) -1;
 
-                Eigen::VectorXf gra2 = 2*((2*thetaHat2.transpose()*eta + 0 - 2)/2)*2*eta/2;
-                Eigen::VectorXf gra3 = 2*((2*thetaHat3.transpose()*eta + 0 - 2)/2)*2*eta/2;
+//                Eigen::VectorXf gra2 = 2*((2*thetaHat2.transpose()*eta + 0 - 2)/2)*2*eta/2;
+//                Eigen::VectorXf gra3 = 2*((2*thetaHat3.transpose()*eta + 0 - 2)/2)*2*eta/2;
 
-                float pro2 = gra2*est2;
-                int flag2;
-                if (abs(g2)<0 && pro2 <=0){
-                    flag2 = 1;
-                }else{
-                    flag2 = 0;
-                }
+//                float pro2 = gra2*est2;
+//                int flag2;
+//                if (abs(g2)<0 && pro2 <=0){
+//                    flag2 = 1;
+//                }else{
+//                    flag2 = 0;
+//                }
 
-                float pro3 = gra3*est3;
-                int flag3;
-                if (abs(g3)<0 && pro3 <=0){
-                    flag3 = 1;
-                }else{
-                    flag3 = 0;
-                }
+//                float pro3 = gra3*est3;
+//                int flag3;
+//                if (abs(g3)<0 && pro3 <=0){
+//                    flag3 = 1;
+//                }else{
+//                    flag3 = 0;
+//                }
 
-                Eigen::VectorXf thetaHatDot2;
-                if (abs(g2)<0 || flag2==1){
-                    thetaHatDot2 = est2;
-                }else{
-                    thetaHatDot2 = (I5 - (gra2 * gra2.transpose()));
-                }
+//                Eigen::VectorXf thetaHatDot2;
+//                if (abs(g2)<0 || flag2==1){
+//                    thetaHatDot2 = est2;
+//                }else{
+//                    thetaHatDot2 = (I5 - (gra2 * gra2.transpose()));
+//                }
 
-                Eigen::VectorXf thetaHatDot3;
-                if (abs(g2)<0 || flag3==1){
-                    thetaHatDot3 = est3;
-                }else{
-                    thetaHatDot3 = (I5 - (gra3 * gra3.transpose()));
-                }
+//                Eigen::VectorXf thetaHatDot3;
+//                if (abs(g2)<0 || flag3==1){
+//                    thetaHatDot3 = est3;
+//                }else{
+//                    thetaHatDot3 = (I5 - (gra3 * gra3.transpose()));
+//                }
 
-                //controller for maneuver
-                float ct = 1, cq = 1, cg = 1;
-                float alpha_ref, theta, q, Vt;
+//                //controller for maneuver
+//                float ct = 1, cq = 1, cg = 1;
+//                float alpha_ref, theta, q, Vt;
 
-                float uth = 1/sin(alpha)*(-qbar*sref*thetaHat2.transpose()*eta + m*Vt*cg*(-gamma));
-                float uq = ct*(alpha_ref + gamma - theta);
-                float ude = cq*(uq - q) - thetaHat3*eta;//attention!!!
+//                float uth = 1/sin(alpha)*(-qbar*sref*thetaHat2.transpose()*eta + m*Vt*cg*(-gamma));
+//                float uq = ct*(alpha_ref + gamma - theta);
+//                float ude = cq*(uq - q) - thetaHat3*eta;//attention!!!
 
-                float h_ref = 0;
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+//                float h_ref = 0;
 
 
 
@@ -673,7 +739,7 @@ AcrobaticCommand::Run()
                 //_alt_sp_acrobatic += (float)((now-time_prev)/1e6)
                 //float u = _local_pos.vx;
                 //float v = _local_pos.vy;
-                //float w = _local_pos.vz;
+                float w = _local_pos.vz;
 
                 /*_alt_first_acrobatic += (float)((now-time_prev)/1e6) *
                         (2*(_att_q(1)*_att_q(3)-_att_q(0)*_att_q(2))*u +
@@ -681,10 +747,10 @@ AcrobaticCommand::Run()
                          (_att_q(0)*_att_q(0)-_att_q(1)*_att_q(1)-_att_q(2)*_att_q(2)+_att_q(3)*_att_q(3))*w);*/
 
                 /*The old version (altitude command)*/
-//                _alt_sp_acrobatic += -1 * (float)((now-time_prev)/1e6) * w; //transfer according to the frame
+                _alt_sp_acrobatic += -1 * (float)((now-time_prev)/1e6) * w; //transfer according to the frame
                 //The altitude command will not change during pugachev maneuver
                 _acrobatic_cmd.airsp_sp = 20;
-                _alt_sp_acrobatic = _alt_first_acrobatic;
+                //_alt_sp_acrobatic = _alt_first_acrobatic;
 
                 _acrobatic_cmd.alt_sp_acrobatic = _alt_sp_acrobatic;
 
@@ -692,7 +758,7 @@ AcrobaticCommand::Run()
                // _alt_sp_acrobatic = _xyz_cmd[2];
                // _acrobatic_cmd.alt_sp_acrobatic = _alt_sp_acrobatic;
 
-                _acrobatic_cmd.euler_cmd[0] = asinf(2*(_att_q(0)*_att_q(2)-_att_q(3)*_att_q(1)));
+                //_acrobatic_cmd.euler_cmd[0] = asinf(2*(_att_q(0)*_att_q(2)-_att_q(3)*_att_q(1)));
 
                 //PX4_INFO("-------------------------");
                 //PX4_INFO("timestamp:%lld",_acrobatic_cmd.timestamp);
